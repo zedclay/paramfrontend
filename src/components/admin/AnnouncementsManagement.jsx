@@ -1,0 +1,365 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { FaPlus, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+
+const AnnouncementsManagement = () => {
+  const [announcements, setAnnouncements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [message, setMessage] = useState({ type: '', text: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    title_fr: '',
+    title_ar: '',
+    content_fr: '',
+    content_ar: '',
+    is_published: false,
+    target_audience: 'all',
+  });
+
+  useEffect(() => {
+    fetchAnnouncements();
+  }, []);
+
+  const fetchAnnouncements = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('/admin/announcements');
+      setAnnouncements(response.data.data || []);
+      if (response.data.data && response.data.data.length === 0) {
+        setMessage({ type: 'info', text: 'Aucune annonce trouvée. Créez votre première annonce!' });
+      }
+    } catch (error) {
+      console.error('Error fetching announcements:', error);
+      setMessage({ 
+        type: 'error', 
+        text: 'Erreur lors du chargement des annonces: ' + (error.response?.data?.error?.message || 'Erreur inconnue') 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (announcement) => {
+    setEditingId(announcement.id);
+    setFormData({
+      title_fr: announcement.title?.fr || '',
+      title_ar: announcement.title?.ar || '',
+      content_fr: announcement.content?.fr || '',
+      content_ar: announcement.content?.ar || '',
+      is_published: announcement.is_published || false,
+      target_audience: announcement.target_audience || 'all',
+    });
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingId(null);
+    setFormData({
+      title_fr: '',
+      title_ar: '',
+      content_fr: '',
+      content_ar: '',
+      is_published: false,
+      target_audience: 'all',
+    });
+    setMessage({ type: '', text: '' });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setMessage({ type: '', text: '' });
+
+    const data = {
+      title: { fr: formData.title_fr, ar: formData.title_ar },
+      content: { fr: formData.content_fr, ar: formData.content_ar },
+      is_published: formData.is_published,
+      target_audience: formData.target_audience,
+    };
+
+    try {
+      if (editingId) {
+        await axios.put(`/admin/announcements/${editingId}`, data);
+        setMessage({ type: 'success', text: 'Annonce modifiée avec succès!' });
+      } else {
+        await axios.post('/admin/announcements', data);
+        setMessage({ type: 'success', text: 'Annonce créée avec succès!' });
+      }
+      handleCloseModal();
+      fetchAnnouncements();
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+    } catch (error) {
+      console.error('Error saving announcement:', error);
+      setMessage({ 
+        type: 'error', 
+        text: 'Erreur: ' + (error.response?.data?.error?.message || error.response?.data?.error?.details || 'Erreur inconnue') 
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette annonce?')) return;
+    try {
+      await axios.delete(`/admin/announcements/${id}`);
+      setMessage({ type: 'success', text: 'Annonce supprimée avec succès!' });
+      fetchAnnouncements();
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+    } catch (error) {
+      console.error('Error deleting announcement:', error);
+      setMessage({ 
+        type: 'error', 
+        text: 'Erreur lors de la suppression: ' + (error.response?.data?.error?.message || 'Erreur inconnue') 
+      });
+      setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-text-dark">Gestion des annonces</h2>
+        <button
+          onClick={() => {
+            setEditingId(null);
+            setFormData({
+              title_fr: '',
+              title_ar: '',
+              content_fr: '',
+              content_ar: '',
+              is_published: false,
+              target_audience: 'all',
+            });
+            setShowModal(true);
+          }}
+          className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark flex items-center transition"
+        >
+          <FaPlus className="mr-2" /> Nouvelle annonce
+        </button>
+      </div>
+
+      {/* Message Display */}
+      {message.text && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`p-4 rounded-lg ${
+            message.type === 'success' 
+              ? 'bg-green-100 text-green-800 border border-green-300' 
+              : message.type === 'error'
+              ? 'bg-red-100 text-red-800 border border-red-300'
+              : 'bg-blue-100 text-blue-800 border border-blue-300'
+          }`}
+        >
+          {message.text}
+        </motion.div>
+      )}
+
+      <div className="bg-white rounded-lg shadow-md p-6">
+        {loading ? (
+          <div className="text-center py-12">Chargement...</div>
+        ) : announcements.length > 0 ? (
+          <div className="space-y-4">
+            {announcements.map((announcement) => (
+              <motion.div 
+                key={announcement.id} 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="font-semibold text-lg text-text-dark">{announcement.title?.fr || announcement.title}</h3>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        announcement.is_published 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {announcement.is_published ? 'Publié' : 'Brouillon'}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 mt-2 line-clamp-2">
+                      {announcement.content?.fr || announcement.content}
+                    </p>
+                    <div className="flex items-center gap-4 mt-4 text-sm text-gray-500">
+                      <span>Créé le: {new Date(announcement.created_at).toLocaleDateString('fr-FR')}</span>
+                      {announcement.published_at && (
+                        <span>Publié le: {new Date(announcement.published_at).toLocaleDateString('fr-FR')}</span>
+                      )}
+                      {announcement.target_audience && (
+                        <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs">
+                          {announcement.target_audience === 'all' ? 'Tous' : 
+                           announcement.target_audience === 'students' ? 'Étudiants' : 
+                           'Spécialité'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-2 ml-4">
+                    <button 
+                      onClick={() => handleEdit(announcement)}
+                      className="text-blue-600 hover:text-blue-800 transition p-2 hover:bg-blue-50 rounded"
+                      title="Modifier"
+                    >
+                      <FaEdit />
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(announcement.id)} 
+                      className="text-red-600 hover:text-red-800 transition p-2 hover:bg-red-50 rounded"
+                      title="Supprimer"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg mb-2">Aucune annonce pour le moment</p>
+            <p className="text-gray-400 text-sm">Cliquez sur "Nouvelle annonce" pour créer votre première annonce</p>
+          </div>
+        )}
+      </div>
+
+      {/* Create/Edit Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-2xl font-bold text-text-dark">
+                {editingId ? 'Modifier l\'annonce' : 'Nouvelle annonce'}
+              </h3>
+              <button
+                onClick={handleCloseModal}
+                className="text-gray-500 hover:text-gray-700 transition"
+              >
+                <FaTimes className="text-xl" />
+              </button>
+            </div>
+
+            {message.text && message.type !== 'success' && (
+              <div className={`p-3 rounded-lg mb-4 ${
+                message.type === 'error' 
+                  ? 'bg-red-100 text-red-800' 
+                  : 'bg-blue-100 text-blue-800'
+              }`}>
+                {message.text}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Titre (FR)</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.title_fr}
+                    onChange={(e) => setFormData({ ...formData, title_fr: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Titre (AR)</label>
+                  <input
+                    type="text"
+                    value={formData.title_ar}
+                    onChange={(e) => setFormData({ ...formData, title_ar: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Contenu (FR)</label>
+                  <textarea
+                    required
+                    value={formData.content_fr}
+                    onChange={(e) => setFormData({ ...formData, content_fr: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg"
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Contenu (AR)</label>
+                  <textarea
+                    value={formData.content_ar}
+                    onChange={(e) => setFormData({ ...formData, content_ar: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg"
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Public cible</label>
+                  <select
+                    value={formData.target_audience}
+                    onChange={(e) => setFormData({ ...formData, target_audience: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
+                    <option value="all">Tous</option>
+                    <option value="students">Étudiants uniquement</option>
+                    <option value="specific_specialite">Spécialité spécifique</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.is_published}
+                      onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
+                      className="mr-2"
+                    />
+                    <span className="text-sm font-medium">Publier immédiatement</span>
+                  </label>
+                  <p className="text-xs text-gray-500 mt-1 ml-6">
+                    Si coché, l'annonce sera visible par les étudiants immédiatement
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-6">
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  disabled={submitting}
+                  className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition disabled:opacity-50"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark transition disabled:opacity-50 flex items-center justify-center"
+                >
+                  {submitting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      {editingId ? 'Modification...' : 'Création...'}
+                    </>
+                  ) : (
+                    editingId ? 'Modifier' : 'Créer'
+                  )}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AnnouncementsManagement;
+
