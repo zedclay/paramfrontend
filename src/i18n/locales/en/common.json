@@ -1,0 +1,206 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "update": "Update",
+    "search": "Search",
+    "filter": "Filter",
+    "actions": "Actions",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "close": "Close"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "academic": "Academic",
+    "filieres": "Programs",
+    "specialites": "Specialties",
+    "modules": "Modules",
+    "announcements": "Announcements",
+    "contact": "Contact",
+    "login": "Login",
+    "logout": "Logout",
+    "dashboard": "Dashboard"
+  },
+  "home": {
+    "hero": {
+      "slide1": {
+        "title": "Welcome to the Paramedical Institute",
+        "subtitle": "Excellence in paramedical training"
+      },
+      "slide2": {
+        "title": "Quality Training",
+        "subtitle": "Prepare yourself for a career in the health sector"
+      },
+      "slide3": {
+        "title": "Modern Infrastructure",
+        "subtitle": "State-of-the-art equipment for your training"
+      }
+    },
+    "title": "Welcome to the Paramedical Institute",
+    "subtitle": "Excellence in paramedical training",
+    "discoverPrograms": "Discover our Programs",
+    "contactUs": "Contact Us",
+    "statistics": {
+      "filieres": "Programs",
+      "students": "Students",
+      "modules": "Modules",
+      "yearsExperience": "Years of Experience"
+    },
+    "aboutTitle": "About Our Institute",
+    "aboutDescription": "The Paramedical Institute of Sidi Bel Abbès is a higher education institution dedicated to training competent professionals in the field of public health. We offer quality training programs that prepare our students to excel in their paramedical careers.",
+    "mission": "Our mission is to provide excellence-based training based on professional skills and ethical values, while preparing our students to meet the growing needs of the health sector.",
+    "learnMore": "Learn More",
+    "whyChooseUs": "Why Choose Our Institute?",
+    "whyChooseUsSubtitle": "We are committed to offering the best possible educational experience",
+    "features": {
+      "qualityTraining": {
+        "title": "Quality Training",
+        "description": "Rigorous academic programs designed by medical sector experts"
+      },
+      "modernInfrastructure": {
+        "title": "Modern Infrastructure",
+        "description": "Laboratories equipped with the latest technologies and medical equipment"
+      },
+      "practicalExperience": {
+        "title": "Practical Experience",
+        "description": "Clinical internships and practices in partner health facilities"
+      }
+    },
+    "aboutFeatures": {
+      "expertTeachers": "Expert Teachers",
+      "modernEquipment": "Modern Equipment",
+      "personalizedSupport": "Personalized Support",
+      "recognizedCertification": "Recognized Certification"
+    },
+    "programsTitle": "Our Training Programs",
+    "programsSubtitle": "Discover our paramedical training programs designed to prepare you for a successful career in the health sector",
+    "viewAllPrograms": "View All Programs",
+    "announcementsTitle": "Latest Announcements",
+    "announcementsSubtitle": "Stay informed about the latest news from the institute",
+    "viewAllAnnouncements": "View All Announcements",
+    "readMore": "Read More",
+    "ctaTitle": "Ready to Start Your Journey?",
+    "ctaSubtitle": "Join our community of passionate students and start your career in the health sector",
+    "explorePrograms": "Explore our Programs",
+    "contactUs": "Contact Us"
+  },
+  "about": {
+    "title": "About the Institute",
+    "subtitle": "Paramedical Institute of Sidi Bel Abbès - Excellence in paramedical training",
+    "mission": {
+      "title": "Our Mission",
+      "description": "Train competent and committed paramedical professionals to meet public health needs. The institute is committed to providing quality training based on professional skills and ethical values, to prepare students to practice their profession with excellence in the field of public health."
+    },
+    "vision": {
+      "title": "Our Vision",
+      "description": "To be a reference institute in paramedical training, recognized for the excellence of its programs, the quality of its teaching and the impact of its graduates on the Algerian public health system. We aspire to train a new generation of paramedical professionals capable of evolving in a constantly changing health environment."
+    },
+    "history": {
+      "title": "History",
+      "p1": "The Paramedical Institute of Sidi Bel Abbès is part of the national network of paramedical training institutes under the supervision of the National Pedagogical Institute of Paramedical Training (INPFP).",
+      "p2": "The institute offers Professional License level training in various paramedical fields, in accordance with national public health training standards. Our programs are designed to meet the real needs of the health sector and prepare students for contemporary professional challenges.",
+      "p3": "Since its creation, the institute has trained hundreds of paramedical professionals who actively contribute to the Algerian health system, in public health facilities across the country."
+    },
+    "statistics": {
+      "filieres": "Programs",
+      "programs": "Programs",
+      "years": "Years",
+      "campus": "Campus"
+    },
+    "programs": {
+      "title": "Our Training",
+      "description": "The institute offers Professional License level training (3 years) in the following fields:"
+    },
+    "values": {
+      "title": "Our Values",
+      "excellence": {
+        "title": "Excellence",
+        "description": "We strive for excellence in all aspects of training and teaching."
+      },
+      "ethics": {
+        "title": "Ethics",
+        "description": "Integrity and professional ethics are at the heart of our training."
+      },
+      "innovation": {
+        "title": "Innovation",
+        "description": "We adopt modern and innovative teaching methods."
+      }
+    }
+  },
+  "filieres": {
+    "title": "Our Programs",
+    "subtitle": "Discover our paramedical training programs",
+    "backToPrograms": "Back to Programs",
+    "specialities": "Specialties",
+    "duration": "Duration",
+    "learnMore": "Learn More"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "We are here to answer your questions",
+    "contactInfo": "Contact Information",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "officeHours": "Office Hours",
+    "sendMessage": "Send us a message",
+    "fullName": "Full Name",
+    "subject": "Subject",
+    "message": "Message",
+    "sending": "Sending...",
+    "sendMessageBtn": "Send Message",
+    "messageSent": "Message sent successfully!",
+    "mapPlaceholder": "Map to be integrated"
+  },
+  "auth": {
+    "login": "Login",
+    "loginSubtitle": "Access your student or administrator space",
+    "email": "Email",
+    "password": "Password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "loginBtn": "Login",
+    "invalidCredentials": "Invalid email or password",
+    "loginSuccess": "Login successful",
+    "studentNote": "Note: Student accounts are created only by administrators."
+  },
+  "dashboard": {
+    "admin": {
+      "title": "Admin Dashboard",
+      "welcome": "Welcome",
+      "statistics": "Statistics",
+      "quickActions": "Quick Actions"
+    },
+    "student": {
+      "title": "Student Dashboard",
+      "welcome": "Welcome",
+      "mySchedule": "My Schedule",
+      "myNotes": "My Notes",
+      "myProfile": "My Profile"
+    }
+  },
+  "announcements": {
+    "subtitle": "Stay informed about the latest news and announcements from the Paramedical Institute",
+    "noAnnouncements": "No announcements at the moment",
+    "noAnnouncementsDesc": "Announcements will be published here when available."
+  },
+  "errors": {
+    "404": "Page not found",
+    "500": "Server error",
+    "networkError": "Network error. Please check your connection.",
+    "unauthorized": "You are not authorized to access this resource.",
+    "forbidden": "Access forbidden.",
+    "notFound": "Resource not found."
+  }
+}
+

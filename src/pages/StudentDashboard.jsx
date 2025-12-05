@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaFileAlt, FaDownload, FaEye, FaBook } from 'react-icons/fa';
+import { FaFileAlt, FaDownload, FaEye, FaBook, FaCalendarAlt, FaGraduationCap, FaUsers } from 'react-icons/fa';
 import AnimatedCard from '../components/AnimatedCard';
 import { CardSkeleton } from '../components/LoadingSkeleton';
 
@@ -152,6 +152,7 @@ const StudentDashboard = () => {
           <div className="flex space-x-1">
             {[
               { id: 'overview', label: 'Vue d\'ensemble', icon: FaBook },
+              { id: 'schedule', label: 'Emploi du Temps', icon: FaCalendarAlt },
               { id: 'notes', label: 'Mes Notes', icon: FaFileAlt },
               { id: 'modules', label: 'Mes Modules', icon: FaBook },
             ].map((tab) => (
@@ -180,6 +181,34 @@ const StudentDashboard = () => {
             <div className="bg-gradient-to-r from-primary to-secondary text-white rounded-lg shadow-md p-6">
               <h2 className="text-2xl font-bold mb-2">Bienvenue, {user?.name}!</h2>
               <p className="text-white/90">Voici un aperçu de votre tableau de bord étudiant.</p>
+              {user && (
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  {user.filiere && (
+                    <div>
+                      <p className="text-white/70">Filière</p>
+                      <p className="font-semibold">{user.filiere.name?.fr || user.filiere.name}</p>
+                    </div>
+                  )}
+                  {user.speciality && (
+                    <div>
+                      <p className="text-white/70">Spécialité</p>
+                      <p className="font-semibold">{user.speciality.name?.fr || user.speciality.name}</p>
+                    </div>
+                  )}
+                  {user.year && (
+                    <div>
+                      <p className="text-white/70">Année</p>
+                      <p className="font-semibold">{user.year.name?.fr || `Année ${user.year.year_number}`}</p>
+                    </div>
+                  )}
+                  {user.group && (
+                    <div>
+                      <p className="text-white/70">Groupe</p>
+                      <p className="font-semibold">{user.group.name}</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Quick Stats */}
@@ -393,6 +422,21 @@ const StudentDashboard = () => {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {activeTab === 'schedule' && (
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="text-center py-8">
+              <FaCalendarAlt className="text-5xl text-primary mx-auto mb-4 opacity-50" />
+              <p className="text-gray-500 mb-4">Voir votre emploi du temps complet</p>
+              <Link
+                to="/student/schedule"
+                className="inline-block bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition"
+              >
+                Ouvrir l'emploi du temps
+              </Link>
+            </div>
+          </div>
+        )}
 
         {activeTab === 'modules' && (
           <div className="bg-white rounded-lg shadow-md p-6">

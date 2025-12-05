@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { FaBook, FaGraduationCap, FaClock } from 'react-icons/fa';
 
 const Modules = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const specialiteId = searchParams.get('specialite_id');
   const [modules, setModules] = useState([]);
@@ -40,7 +42,7 @@ const Modules = () => {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    return <div className="flex justify-center items-center min-h-screen">{t('common.loading')}</div>;
   }
 
   if (selectedModule) {
@@ -50,7 +52,7 @@ const Modules = () => {
           onClick={() => setSelectedModule(null)}
           className="mb-6 text-primary hover:text-primary-dark"
         >
-          ← Retour aux modules
+          ← {t('modules.back') || 'Retour aux modules'}
         </button>
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-4xl mx-auto">
           <div className="flex items-start justify-between mb-6">
@@ -103,9 +105,9 @@ const Modules = () => {
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="text-center mb-12">
-        <h1 className="text-5xl font-bold mb-4 text-text-dark">Modules</h1>
+        <h1 className="text-5xl font-bold mb-4 text-text-dark">{t('nav.modules')}</h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Découvrez nos modules de formation
+          {t('modules.subtitle') || 'Découvrez nos modules de formation'}
         </p>
       </div>
 

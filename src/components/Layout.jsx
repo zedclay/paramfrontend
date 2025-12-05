@@ -1,47 +1,22 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaBars, FaTimes, FaGlobe, FaBullhorn } from 'react-icons/fa';
+import { FaBars, FaTimes, FaGlobe, FaBullhorn, FaChevronDown } from 'react-icons/fa';
 
 const Layout = ({ children, locale, changeLocale }) => {
   const { user, logout, isAuthenticated } = useAuth();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [academicDropdownOpen, setAcademicDropdownOpen] = useState(false);
+  const [mobileAcademicOpen, setMobileAcademicOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
   };
-
-  const translations = {
-    fr: {
-      home: 'Accueil',
-      about: 'À propos',
-      filieres: 'Filières',
-      specialites: 'Spécialités',
-      modules: 'Modules',
-      announcements: 'Annonces',
-      contact: 'Contact',
-      login: 'Connexion',
-      dashboard: 'Tableau de bord',
-      logout: 'Déconnexion',
-    },
-    ar: {
-      home: 'الرئيسية',
-      about: 'من نحن',
-      filieres: 'الشعب',
-      specialites: 'التخصصات',
-      modules: 'الوحدات',
-      announcements: 'الإعلانات',
-      contact: 'اتصل بنا',
-      login: 'تسجيل الدخول',
-      dashboard: 'لوحة التحكم',
-      logout: 'تسجيل الخروج',
-    },
-  };
-
-  const t = translations[locale] || translations.fr;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -66,42 +41,134 @@ const Layout = ({ children, locale, changeLocale }) => {
 
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-6">
-              {[
-                { to: '/', label: t.home },
-                { to: '/about', label: t.about },
-                { to: '/filieres', label: t.filieres },
-                { to: '/specialites', label: t.specialites },
-                { to: '/modules', label: t.modules },
-                { to: '/announcements', label: t.announcements, icon: FaBullhorn },
-                { to: '/contact', label: t.contact },
-              ].map((item) => (
-                <motion.div key={item.to} whileHover={{ y: -2 }}>
-                  <Link
-                    to={item.to}
-                    className="text-gray-700 hover:text-primary transition-colors relative group"
-                  >
-                    {item.label}
+              {/* Home */}
+              <motion.div whileHover={{ y: -2 }}>
+                <Link
+                  to="/"
+                  className="text-gray-700 hover:text-primary transition-colors relative group"
+                >
+                  {t('nav.home')}
+                  <motion.span
+                    className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"
+                    initial={{ width: 0 }}
+                    whileHover={{ width: '100%' }}
+                  />
+                </Link>
+              </motion.div>
+
+              {/* About */}
+              <motion.div whileHover={{ y: -2 }}>
+                <Link
+                  to="/about"
+                  className="text-gray-700 hover:text-primary transition-colors relative group"
+                >
+                  {t('nav.about')}
+                  <motion.span
+                    className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"
+                    initial={{ width: 0 }}
+                    whileHover={{ width: '100%' }}
+                  />
+                </Link>
+              </motion.div>
+
+              {/* Academic Dropdown */}
+              <div
+                className="relative"
+                onMouseEnter={() => setAcademicDropdownOpen(true)}
+                onMouseLeave={() => setAcademicDropdownOpen(false)}
+              >
+                <motion.div whileHover={{ y: -2 }}>
+                  <button className="text-gray-700 hover:text-primary transition-colors relative group flex items-center">
+                    {t('nav.academic')}
+                    <FaChevronDown className={`ml-1 text-xs transition-transform ${academicDropdownOpen ? 'rotate-180' : ''}`} />
                     <motion.span
                       className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"
                       initial={{ width: 0 }}
                       whileHover={{ width: '100%' }}
                     />
-                  </Link>
+                  </button>
                 </motion.div>
-              ))}
+                
+                <AnimatePresence>
+                  {academicDropdownOpen && (
+                    <motion.div
+                      className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Link
+                        to="/filieres"
+                        className="block px-4 py-2 text-gray-700 hover:bg-primary hover:text-white transition-colors"
+                      >
+                        {t('nav.filieres')}
+                      </Link>
+                      <Link
+                        to="/specialites"
+                        className="block px-4 py-2 text-gray-700 hover:bg-primary hover:text-white transition-colors"
+                      >
+                        {t('nav.specialites')}
+                      </Link>
+                      <Link
+                        to="/modules"
+                        className="block px-4 py-2 text-gray-700 hover:bg-primary hover:text-white transition-colors"
+                      >
+                        {t('nav.modules')}
+                      </Link>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Announcements */}
+              <motion.div whileHover={{ y: -2 }}>
+                <Link
+                  to="/announcements"
+                  className="text-gray-700 hover:text-primary transition-colors relative group"
+                >
+                  {t('nav.announcements')}
+                  <motion.span
+                    className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"
+                    initial={{ width: 0 }}
+                    whileHover={{ width: '100%' }}
+                  />
+                </Link>
+              </motion.div>
+
+              {/* Contact */}
+              <motion.div whileHover={{ y: -2 }}>
+                <Link
+                  to="/contact"
+                  className="text-gray-700 hover:text-primary transition-colors relative group"
+                >
+                  {t('nav.contact')}
+                  <motion.span
+                    className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"
+                    initial={{ width: 0 }}
+                    whileHover={{ width: '100%' }}
+                  />
+                </Link>
+              </motion.div>
 
               {/* Language Switcher */}
               <div className="flex items-center space-x-2 border-l pl-4">
                 <FaGlobe className="text-gray-600" />
                 <button
+                  onClick={() => changeLocale('en')}
+                  className={`px-2 py-1 rounded ${i18n.language === 'en' ? 'bg-primary text-white' : 'text-gray-600'}`}
+                >
+                  EN
+                </button>
+                <button
                   onClick={() => changeLocale('fr')}
-                  className={`px-2 py-1 rounded ${locale === 'fr' ? 'bg-primary text-white' : 'text-gray-600'}`}
+                  className={`px-2 py-1 rounded ${i18n.language === 'fr' ? 'bg-primary text-white' : 'text-gray-600'}`}
                 >
                   FR
                 </button>
                 <button
                   onClick={() => changeLocale('ar')}
-                  className={`px-2 py-1 rounded ${locale === 'ar' ? 'bg-primary text-white' : 'text-gray-600'}`}
+                  className={`px-2 py-1 rounded ${i18n.language === 'ar' ? 'bg-primary text-white' : 'text-gray-600'}`}
                 >
                   AR
                 </button>
@@ -114,13 +181,13 @@ const Layout = ({ children, locale, changeLocale }) => {
                     to={user?.role === 'admin' ? '/admin/dashboard' : '/student/dashboard'}
                     className="text-primary hover:text-primary-dark"
                   >
-                    {t.dashboard}
+                    {t('nav.dashboard')}
                   </Link>
                   <button
                     onClick={handleLogout}
                     className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
                   >
-                    {t.logout}
+                    {t('nav.logout')}
                   </button>
                 </div>
               ) : (
@@ -128,7 +195,7 @@ const Layout = ({ children, locale, changeLocale }) => {
                   to="/login"
                   className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition"
                 >
-                  {t.login}
+                  {t('nav.login')}
                 </Link>
               )}
             </div>
@@ -152,26 +219,85 @@ const Layout = ({ children, locale, changeLocale }) => {
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                {[
-                  { to: '/', label: t.home },
-                  { to: '/about', label: t.about },
-                  { to: '/filieres', label: t.filieres },
-                  { to: '/specialites', label: t.specialites },
-                  { to: '/modules', label: t.modules },
-                  { to: '/announcements', label: t.announcements },
-                  { to: '/contact', label: t.contact },
-                ].map((item, index) => (
-                  <motion.div
-                    key={item.to}
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: index * 0.05 }}
+                {/* Home */}
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0 * 0.05 }}
+                >
+                  <Link to="/" className="block py-2 text-gray-700 hover:text-primary transition">
+                    {t('nav.home')}
+                  </Link>
+                </motion.div>
+
+                {/* About */}
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 1 * 0.05 }}
+                >
+                  <Link to="/about" className="block py-2 text-gray-700 hover:text-primary transition">
+                    {t('nav.about')}
+                  </Link>
+                </motion.div>
+
+                {/* Academic Dropdown (Mobile) */}
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 2 * 0.05 }}
+                >
+                  <button
+                    onClick={() => setMobileAcademicOpen(!mobileAcademicOpen)}
+                    className="w-full flex items-center justify-between py-2 text-gray-700 hover:text-primary transition"
                   >
-                    <Link to={item.to} className="block py-2 text-gray-700 hover:text-primary transition">
-                      {item.label}
-                    </Link>
-                  </motion.div>
-                ))}
+                    <span>{t('nav.academic')}</span>
+                    <FaChevronDown className={`text-xs transition-transform ${mobileAcademicOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  <AnimatePresence>
+                    {mobileAcademicOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="pl-4 space-y-1"
+                      >
+                        <Link to="/filieres" className="block py-2 text-gray-600 hover:text-primary transition">
+                          {t('nav.filieres')}
+                        </Link>
+                        <Link to="/specialites" className="block py-2 text-gray-600 hover:text-primary transition">
+                          {t('nav.specialites')}
+                        </Link>
+                        <Link to="/modules" className="block py-2 text-gray-600 hover:text-primary transition">
+                          {t('nav.modules')}
+                        </Link>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+
+                {/* Announcements */}
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 3 * 0.05 }}
+                >
+                  <Link to="/announcements" className="block py-2 text-gray-700 hover:text-primary transition">
+                    {t('nav.announcements')}
+                  </Link>
+                </motion.div>
+
+                {/* Contact */}
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 4 * 0.05 }}
+                >
+                  <Link to="/contact" className="block py-2 text-gray-700 hover:text-primary transition">
+                    {t('nav.contact')}
+                  </Link>
+                </motion.div>
                 {isAuthenticated ? (
                   <>
                     <motion.div
@@ -183,7 +309,7 @@ const Layout = ({ children, locale, changeLocale }) => {
                         to={user?.role === 'admin' ? '/admin/dashboard' : '/student/dashboard'}
                         className="block py-2 text-primary"
                       >
-                        {t.dashboard}
+                        {t('nav.dashboard')}
                       </Link>
                     </motion.div>
                     <motion.div
@@ -192,7 +318,7 @@ const Layout = ({ children, locale, changeLocale }) => {
                       transition={{ delay: 0.35 }}
                     >
                       <button onClick={handleLogout} className="block py-2 text-red-500">
-                        {t.logout}
+                        {t('nav.logout')}
                       </button>
                     </motion.div>
                   </>
@@ -202,7 +328,7 @@ const Layout = ({ children, locale, changeLocale }) => {
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.3 }}
                   >
-                    <Link to="/login" className="block py-2 text-primary">{t.login}</Link>
+                    <Link to="/login" className="block py-2 text-primary">{t('nav.login')}</Link>
                   </motion.div>
                 )}
               </motion.div>
@@ -233,9 +359,9 @@ const Layout = ({ children, locale, changeLocale }) => {
                 {locale === 'ar' ? 'روابط سريعة' : 'Liens rapides'}
               </h4>
               <ul className="space-y-2">
-                <li><Link to="/about" className="text-gray-300 hover:text-white">{t.about}</Link></li>
-                <li><Link to="/filieres" className="text-gray-300 hover:text-white">{t.filieres}</Link></li>
-                <li><Link to="/contact" className="text-gray-300 hover:text-white">{t.contact}</Link></li>
+                <li><Link to="/about" className="text-gray-300 hover:text-white">{t('nav.about')}</Link></li>
+                <li><Link to="/filieres" className="text-gray-300 hover:text-white">{t('nav.filieres')}</Link></li>
+                <li><Link to="/contact" className="text-gray-300 hover:text-white">{t('nav.contact')}</Link></li>
               </ul>
             </div>
             <div>

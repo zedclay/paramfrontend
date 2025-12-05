@@ -1,18 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { FaArrowRight, FaGraduationCap } from 'react-icons/fa';
 import AnimatedCard from '../components/AnimatedCard';
 import { CardSkeleton } from '../components/LoadingSkeleton';
+import { IMAGE_PATHS, getFiliereImage } from '../constants';
 
 const Filieres = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [filieres, setFilieres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedFiliere, setSelectedFiliere] = useState(null);
   const [filiereLoading, setFiliereLoading] = useState(false);
+
+  // Get image for filiere card - uses specific image for each filière
 
   useEffect(() => {
     fetchFilieres();
@@ -75,9 +80,9 @@ const Filieres = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-5xl font-bold mb-4 text-text-dark">Nos Filières</h1>
+        <h1 className="text-5xl font-bold mb-4 text-text-dark">{t('filieres.title')}</h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Découvrez nos programmes de formation paramédicale
+          {t('filieres.subtitle')}
         </p>
       </motion.div>
 
@@ -96,7 +101,7 @@ const Filieres = () => {
               className="mb-6 text-primary hover:text-primary-dark flex items-center"
               whileHover={{ x: -5 }}
             >
-              <FaArrowRight className="mr-2 rotate-180" /> Retour aux filières
+              <FaArrowRight className="mr-2 rotate-180" /> {t('filieres.backToPrograms')}
             </motion.button>
             
             {filiereLoading ? (
@@ -107,24 +112,51 @@ const Filieres = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                <h2 className="text-4xl font-bold mb-4 text-text-dark">{selectedFiliere.name?.fr}</h2>
-                <p className="text-lg text-gray-700 mb-6">{selectedFiliere.description?.fr}</p>
+                {/* Filière Header with Image */}
+                <div className="relative h-64 mb-6 rounded-lg overflow-hidden">
+                  <img 
+                    src={getFiliereImage(selectedFiliere.slug || selectedFiliere.id)} 
+                    alt={selectedFiliere.name?.fr}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = IMAGE_PATHS.FILIERES.NURSING;
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/50 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h2 className="text-4xl font-bold mb-2 text-white drop-shadow-lg">{selectedFiliere.name?.fr}</h2>
+                    <p className="text-white/90 text-lg">{selectedFiliere.description?.fr?.substring(0, 150)}...</p>
+                  </div>
+                </div>
                 
                 {selectedFiliere.specialities && selectedFiliere.specialities.length > 0 && (
                   <div className="mt-8">
-                    <h3 className="text-2xl font-semibold mb-4 text-text-dark">Spécialités</h3>
+                    <h3 className="text-2xl font-semibold mb-4 text-text-dark">{t('filieres.specialities')}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {selectedFiliere.specialities.map((speciality, index) => (
                         <AnimatedCard key={speciality.id} delay={index * 0.1}>
                           <motion.div
-                            className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-white to-gray-50"
+                            className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 bg-white"
                             whileHover={{ scale: 1.02, y: -5 }}
                           >
-                            <h4 className="font-semibold text-lg text-primary mb-2">{speciality.name?.fr}</h4>
-                            <p className="text-gray-600 text-sm">{speciality.description?.fr?.substring(0, 100)}...</p>
-                            {speciality.duration && (
-                              <p className="text-sm text-gray-500 mt-2">Durée: {speciality.duration}</p>
-                            )}
+                            <div className="relative h-32 overflow-hidden">
+                              <img 
+                                src={getFiliereImage(selectedFiliere.slug || selectedFiliere.id)} 
+                                alt={speciality.name?.fr}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.src = IMAGE_PATHS.FILIERES.NURSING;
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent"></div>
+                            </div>
+                            <div className="p-4">
+                              <h4 className="font-semibold text-lg text-primary mb-2">{speciality.name?.fr}</h4>
+                              <p className="text-gray-600 text-sm">{speciality.description?.fr?.substring(0, 100)}...</p>
+                              {speciality.duration && (
+                                <p className="text-sm text-gray-500 mt-2">{t('filieres.duration')}: {speciality.duration}</p>
+                              )}
+                            </div>
                           </motion.div>
                         </AnimatedCard>
                       ))}
@@ -145,25 +177,34 @@ const Filieres = () => {
             {filieres.map((filiere, index) => (
               <AnimatedCard key={filiere.id} delay={index * 0.1}>
                 <motion.div
-                  className="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition-all duration-300 cursor-pointer bg-gradient-to-br from-white to-gray-50"
+                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group"
                   onClick={() => handleFiliereClick(filiere.id)}
-                  whileHover={{ scale: 1.05, y: -5 }}
+                  whileHover={{ scale: 1.03, y: -5 }}
                 >
-                  <motion.div
-                    className="flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4 mx-auto"
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <FaGraduationCap className="text-3xl text-primary" />
-                  </motion.div>
-                  <h3 className="text-xl font-semibold mb-3 text-text-dark text-center">{filiere.name?.fr}</h3>
-                  <p className="text-gray-600 mb-4 line-clamp-3">{filiere.description?.fr}</p>
-                  <motion.button
-                    className="text-primary hover:text-primary-dark flex items-center font-medium mx-auto"
-                    whileHover={{ x: 5 }}
-                  >
-                    En savoir plus <FaArrowRight className="ml-2" />
-                  </motion.button>
+                  <div className="relative h-48 overflow-hidden">
+                    <img 
+                      src={getFiliereImage(filiere.slug || filiere.id)} 
+                      alt={filiere.name?.fr}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      onError={(e) => {
+                        console.error('Filière image failed to load:', filiere.slug || filiere.id);
+                        e.target.src = IMAGE_PATHS.FILIERES.NURSING; // Fallback
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent"></div>
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">{filiere.name?.fr}</h3>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <p className="text-gray-600 mb-4 line-clamp-3">{filiere.description?.fr}</p>
+                    <motion.button
+                      className="text-primary hover:text-primary-dark flex items-center font-medium"
+                      whileHover={{ x: 5 }}
+                    >
+                      {t('filieres.learnMore')} <FaArrowRight className="ml-2" />
+                    </motion.button>
+                  </div>
                 </motion.div>
               </AnimatedCard>
             ))}

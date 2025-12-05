@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { FaBook, FaClock, FaBuilding } from 'react-icons/fa';
+import { IMAGE_PATHS, getFiliereImage, getSpecialiteImage } from '../constants';
 
 const Specialites = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const filiereId = searchParams.get('filiere_id');
   const [specialites, setSpecialites] = useState([]);
@@ -40,7 +43,7 @@ const Specialites = () => {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    return <div className="flex justify-center items-center min-h-screen">{t('common.loading')}</div>;
   }
 
   if (selectedSpecialite) {
@@ -50,13 +53,29 @@ const Specialites = () => {
           onClick={() => setSelectedSpecialite(null)}
           className="mb-6 text-primary hover:text-primary-dark"
         >
-          ← Retour aux spécialités
+          ← {t('specialites.back') || 'Retour aux spécialités'}
         </button>
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-4 text-text-dark">{selectedSpecialite.name?.fr}</h1>
-          <p className="text-lg text-gray-700 mb-6">{selectedSpecialite.description?.fr}</p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden max-w-4xl mx-auto">
+          {/* Speciality Header with Image */}
+          <div className="relative h-64 overflow-hidden">
+            <img 
+              src={getSpecialiteImage(selectedSpecialite)} 
+              alt={selectedSpecialite.name?.fr}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.src = IMAGE_PATHS.SPECIALITES.DEFAULT;
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/50 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 right-0 p-6">
+              <h1 className="text-4xl font-bold mb-2 text-white drop-shadow-lg">{selectedSpecialite.name?.fr}</h1>
+              <p className="text-white/90 text-lg">{selectedSpecialite.description?.fr?.substring(0, 150)}...</p>
+            </div>
+          </div>
+          <div className="p-8">
+            <p className="text-lg text-gray-700 mb-6">{selectedSpecialite.description?.fr}</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {selectedSpecialite.duration && (
               <div className="flex items-center">
                 <FaClock className="text-primary mr-3" />
@@ -106,6 +125,7 @@ const Specialites = () => {
               </div>
             </div>
           )}
+          </div>
         </div>
       </div>
     );
@@ -114,9 +134,9 @@ const Specialites = () => {
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="text-center mb-12">
-        <h1 className="text-5xl font-bold mb-4 text-text-dark">Spécialités</h1>
+        <h1 className="text-5xl font-bold mb-4 text-text-dark">{t('nav.specialites')}</h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Explorez nos spécialisations paramédicales
+          {t('specialites.subtitle') || 'Explorez nos spécialisations paramédicales'}
         </p>
       </div>
 
@@ -145,18 +165,33 @@ const Specialites = () => {
         {specialites.map((specialite) => (
           <div
             key={specialite.id}
-            className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition cursor-pointer"
+            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition cursor-pointer group"
             onClick={() => handleSpecialiteClick(specialite.id)}
           >
-            <h3 className="text-xl font-semibold mb-3 text-text-dark">{specialite.name?.fr}</h3>
-            <p className="text-gray-600 mb-4 line-clamp-3">{specialite.description?.fr}</p>
-            <div className="flex items-center justify-between">
-              {specialite.duration && (
-                <span className="text-sm text-gray-500 flex items-center">
-                  <FaClock className="mr-1" /> {specialite.duration}
-                </span>
-              )}
-              <span className="text-primary font-medium">En savoir plus →</span>
+            <div className="relative h-48 overflow-hidden">
+              <img 
+                src={getSpecialiteImage(specialite)} 
+                alt={specialite.name?.fr}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                onError={(e) => {
+                  e.target.src = IMAGE_PATHS.SPECIALITES.DEFAULT;
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent"></div>
+              <div className="absolute bottom-4 left-4 right-4">
+                <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">{specialite.name?.fr}</h3>
+              </div>
+            </div>
+            <div className="p-6">
+              <p className="text-gray-600 mb-4 line-clamp-3">{specialite.description?.fr}</p>
+              <div className="flex items-center justify-between">
+                {specialite.duration && (
+                  <span className="text-sm text-gray-500 flex items-center">
+                    <FaClock className="mr-1" /> {specialite.duration}
+                  </span>
+                )}
+                <span className="text-primary font-medium">En savoir plus →</span>
+              </div>
             </div>
           </div>
         ))}

@@ -1,0 +1,206 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "update": "Mettre à jour",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "actions": "Actions",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "submit": "Soumettre",
+    "close": "Fermer"
+  },
+  "nav": {
+    "home": "Accueil",
+    "about": "À propos",
+    "academic": "Académique",
+    "filieres": "Filières",
+    "specialites": "Spécialités",
+    "modules": "Modules",
+    "announcements": "Annonces",
+    "contact": "Contact",
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "dashboard": "Tableau de bord"
+  },
+  "home": {
+    "hero": {
+      "slide1": {
+        "title": "Bienvenue à l'Institut Paramédical",
+        "subtitle": "Excellence dans la formation paramédicale"
+      },
+      "slide2": {
+        "title": "Formation de qualité",
+        "subtitle": "Préparez-vous pour une carrière dans le secteur de la santé"
+      },
+      "slide3": {
+        "title": "Infrastructure moderne",
+        "subtitle": "Des équipements de pointe pour votre formation"
+      }
+    },
+    "title": "Bienvenue à l'Institut Paramédical",
+    "subtitle": "Excellence dans la formation paramédicale",
+    "discoverPrograms": "Découvrir nos Filières",
+    "contactUs": "Nous Contacter",
+    "statistics": {
+      "filieres": "Filières",
+      "students": "Étudiants",
+      "modules": "Modules",
+      "yearsExperience": "Années d'expérience"
+    },
+    "aboutTitle": "À Propos de Notre Institut",
+    "aboutDescription": "L'Institut Paramédical de Sidi Bel Abbès est un établissement d'enseignement supérieur dédié à la formation de professionnels compétents dans le domaine de la santé publique. Nous offrons des programmes de formation de qualité qui préparent nos étudiants à exceller dans leurs carrières paramédicales.",
+    "mission": "Notre mission est de dispenser une formation d'excellence basée sur les compétences professionnelles et les valeurs éthiques, tout en préparant nos étudiants à répondre aux besoins croissants du secteur de la santé.",
+    "learnMore": "En savoir plus",
+    "whyChooseUs": "Pourquoi Choisir Notre Institut ?",
+    "whyChooseUsSubtitle": "Nous nous engageons à offrir la meilleure expérience éducative possible",
+    "features": {
+      "qualityTraining": {
+        "title": "Formation de Qualité",
+        "description": "Programmes académiques rigoureux conçus par des experts du secteur médical"
+      },
+      "modernInfrastructure": {
+        "title": "Infrastructure Moderne",
+        "description": "Laboratoires équipés des dernières technologies et équipements médicaux"
+      },
+      "practicalExperience": {
+        "title": "Expérience Pratique",
+        "description": "Stages cliniques et pratiques dans des établissements de santé partenaires"
+      }
+    },
+    "aboutFeatures": {
+      "expertTeachers": "Enseignants Experts",
+      "modernEquipment": "Équipements Modernes",
+      "personalizedSupport": "Accompagnement Personnalisé",
+      "recognizedCertification": "Certification Reconnue"
+    },
+    "programsTitle": "Nos Filières de Formation",
+    "programsSubtitle": "Découvrez nos programmes de formation conçus pour vous préparer à une carrière réussie dans le secteur de la santé",
+    "viewAllPrograms": "Voir toutes les filières",
+    "announcementsTitle": "Dernières Annonces",
+    "announcementsSubtitle": "Restez informé des dernières nouvelles de l'institut",
+    "viewAllAnnouncements": "Voir toutes les annonces",
+    "readMore": "Lire la suite",
+    "ctaTitle": "Prêt à Commencer Votre Parcours ?",
+    "ctaSubtitle": "Rejoignez notre communauté d'étudiants passionnés et démarrez votre carrière dans le secteur de la santé",
+    "explorePrograms": "Explorer nos Programmes",
+    "contactUs": "Nous Contacter"
+  },
+  "about": {
+    "title": "À propos de l'Institut",
+    "subtitle": "Institut Paramédical de Sidi Bel Abbès - Excellence en formation paramédicale",
+    "mission": {
+      "title": "Notre Mission",
+      "description": "Former des professionnels paramédicaux compétents et engagés pour répondre aux besoins de santé publique. L'institut s'engage à dispenser une formation de qualité, basée sur les compétences professionnelles et les valeurs éthiques, afin de préparer les étudiants à exercer leur métier avec excellence dans le domaine de la santé publique."
+    },
+    "vision": {
+      "title": "Notre Vision",
+      "description": "Être un institut de référence en formation paramédicale, reconnu pour l'excellence de ses programmes, la qualité de son enseignement et l'impact de ses diplômés sur le système de santé publique algérien. Nous aspirons à former une nouvelle génération de professionnels paramédicaux capables d'évoluer dans un environnement de santé en constante mutation."
+    },
+    "history": {
+      "title": "Historique",
+      "p1": "L'Institut Paramédical de Sidi Bel Abbès fait partie du réseau national des instituts de formation paramédicale sous la tutelle de l'Institut National Pédagogique de Formation Paramédicale (INPFP).",
+      "p2": "L'institut propose des formations de niveau Licence Professionnalisante dans différents domaines paramédicaux, conformément aux standards nationaux de formation en santé publique. Nos programmes sont conçus pour répondre aux besoins réels du secteur de la santé et préparer les étudiants aux défis professionnels contemporains.",
+      "p3": "Depuis sa création, l'institut a formé des centaines de professionnels paramédicaux qui contribuent activement au système de santé algérien, dans les établissements de santé publique à travers le pays."
+    },
+    "statistics": {
+      "filieres": "Filières",
+      "programs": "Programmes",
+      "years": "Années",
+      "campus": "Campus"
+    },
+    "programs": {
+      "title": "Nos Formations",
+      "description": "L'institut propose des formations de niveau Licence Professionnalisante (3 ans) dans les domaines suivants :"
+    },
+    "values": {
+      "title": "Nos Valeurs",
+      "excellence": {
+        "title": "Excellence",
+        "description": "Nous visons l'excellence dans tous les aspects de la formation et de l'enseignement."
+      },
+      "ethics": {
+        "title": "Éthique",
+        "description": "L'intégrité et l'éthique professionnelle sont au cœur de notre formation."
+      },
+      "innovation": {
+        "title": "Innovation",
+        "description": "Nous adoptons des méthodes pédagogiques modernes et innovantes."
+      }
+    }
+  },
+  "filieres": {
+    "title": "Nos Filières",
+    "subtitle": "Découvrez nos programmes de formation paramédicale",
+    "backToPrograms": "Retour aux filières",
+    "specialities": "Spécialités",
+    "duration": "Durée",
+    "learnMore": "En savoir plus"
+  },
+  "contact": {
+    "title": "Contactez-nous",
+    "subtitle": "Nous sommes là pour répondre à vos questions",
+    "contactInfo": "Informations de contact",
+    "address": "Adresse",
+    "phone": "Téléphone",
+    "email": "Email",
+    "officeHours": "Heures d'ouverture",
+    "sendMessage": "Envoyez-nous un message",
+    "fullName": "Nom complet",
+    "subject": "Sujet",
+    "message": "Message",
+    "sending": "Envoi en cours...",
+    "sendMessageBtn": "Envoyer le message",
+    "messageSent": "Message envoyé avec succès!",
+    "mapPlaceholder": "Carte à intégrer"
+  },
+  "auth": {
+    "login": "Connexion",
+    "loginSubtitle": "Accédez à votre espace étudiant ou administrateur",
+    "email": "Email",
+    "password": "Mot de passe",
+    "rememberMe": "Se souvenir de moi",
+    "forgotPassword": "Mot de passe oublié ?",
+    "loginBtn": "Se connecter",
+    "invalidCredentials": "Email ou mot de passe invalide",
+    "loginSuccess": "Connexion réussie",
+    "studentNote": "Note: Les comptes étudiants sont créés uniquement par les administrateurs."
+  },
+  "dashboard": {
+    "admin": {
+      "title": "Tableau de bord administrateur",
+      "welcome": "Bienvenue",
+      "statistics": "Statistiques",
+      "quickActions": "Actions rapides"
+    },
+    "student": {
+      "title": "Tableau de bord étudiant",
+      "welcome": "Bienvenue",
+      "mySchedule": "Mon Emploi du Temps",
+      "myNotes": "Mes Notes",
+      "myProfile": "Mon Profil"
+    }
+  },
+  "announcements": {
+    "subtitle": "Restez informé des dernières nouvelles et annonces de l'Institut Paramédical",
+    "noAnnouncements": "Aucune annonce pour le moment",
+    "noAnnouncementsDesc": "Les annonces seront publiées ici lorsqu'elles seront disponibles."
+  },
+  "errors": {
+    "404": "Page non trouvée",
+    "500": "Erreur serveur",
+    "networkError": "Erreur réseau. Veuillez vérifier votre connexion.",
+    "unauthorized": "Vous n'êtes pas autorisé à accéder à cette ressource.",
+    "forbidden": "Accès interdit.",
+    "notFound": "Ressource non trouvée."
+  }
+}
+

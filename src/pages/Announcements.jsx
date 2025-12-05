@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { FaBullhorn, FaCalendarAlt, FaUser } from 'react-icons/fa';
@@ -6,6 +7,7 @@ import { CardSkeleton } from '../components/LoadingSkeleton';
 import AnimatedCard from '../components/AnimatedCard';
 
 const Announcements = () => {
+  const { t } = useTranslation();
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -49,9 +51,9 @@ const Announcements = () => {
             <FaBullhorn className="text-primary text-5xl" />
           </div>
         </div>
-        <h1 className="text-5xl font-bold mb-4 text-text-dark">Annonces</h1>
+        <h1 className="text-5xl font-bold mb-4 text-text-dark">{t('nav.announcements')}</h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Restez informé des dernières nouvelles et annonces de l'Institut Paramédical
+          {t('announcements.subtitle') || 'Restez informé des dernières nouvelles et annonces de l\'Institut Paramédical'}
         </p>
       </motion.div>
 
@@ -122,9 +124,9 @@ const Announcements = () => {
           <div className="bg-gray-100 rounded-full p-8 w-32 h-32 mx-auto mb-6 flex items-center justify-center">
             <FaBullhorn className="text-gray-400 text-5xl" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-700 mb-2">Aucune annonce pour le moment</h3>
+          <h3 className="text-2xl font-bold text-gray-700 mb-2">{t('announcements.noAnnouncements') || 'Aucune annonce pour le moment'}</h3>
           <p className="text-gray-500">
-            Les annonces seront publiées ici lorsqu'elles seront disponibles.
+            {t('announcements.noAnnouncementsDesc') || 'Les annonces seront publiées ici lorsqu\'elles seront disponibles.'}
           </p>
         </motion.div>
       )}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
@@ -26,8 +27,10 @@ import {
 } from 'react-icons/fa';
 import AnimatedCard from '../components/AnimatedCard';
 import { CardSkeleton } from '../components/LoadingSkeleton';
+import { IMAGE_PATHS, getFiliereImage } from '../constants';
 
 const Home = () => {
+  const { t } = useTranslation();
   const [filieres, setFilieres] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -53,22 +56,25 @@ const Home = () => {
 
   const heroSlides = [
     {
-      title: 'Bienvenue à l\'Institut Paramédical',
-      subtitle: 'Excellence dans la formation paramédicale',
+      title: t('home.hero.slide1.title'),
+      subtitle: t('home.hero.slide1.subtitle'),
       icon: FaStethoscope,
       gradient: 'from-blue-600 to-cyan-500',
+      image: '/images/hero/hero-1.jpg',
     },
     {
-      title: 'Formation de qualité',
-      subtitle: 'Préparez-vous pour une carrière dans le secteur de la santé',
+      title: t('home.hero.slide2.title'),
+      subtitle: t('home.hero.slide2.subtitle'),
       icon: FaHeartbeat,
       gradient: 'from-emerald-600 to-teal-500',
+      image: '/images/hero/hero-2.jpg',
     },
     {
-      title: 'Infrastructure moderne',
-      subtitle: 'Des équipements de pointe pour votre formation',
+      title: t('home.hero.slide3.title'),
+      subtitle: t('home.hero.slide3.subtitle'),
       icon: FaHospital,
       gradient: 'from-purple-600 to-pink-500',
+      image: '/images/hero/hero-3.jpg',
     },
   ];
 
@@ -107,6 +113,19 @@ const Home = () => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5 }}
                 >
+                  {/* Background Image */}
+                  <div className="absolute inset-0">
+                    <img 
+                      src={slide.image} 
+                      alt={slide.title}
+                      className="w-full h-full object-cover opacity-40"
+                      onError={(e) => {
+                        console.error('Image failed to load:', slide.image);
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent"></div>
+                  </div>
                   {/* Animated background pattern */}
                   <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
@@ -155,7 +174,7 @@ const Home = () => {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                         >
-                          Découvrir nos Filières
+                          {t('home.discoverPrograms')}
                         </motion.button>
                       </Link>
                       <Link to="/contact">
@@ -164,7 +183,7 @@ const Home = () => {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                         >
-                          Nous Contacter
+                          {t('home.contactUs')}
                         </motion.button>
                       </Link>
                     </motion.div>
@@ -187,10 +206,10 @@ const Home = () => {
             transition={{ duration: 0.6 }}
           >
             {[
-              { icon: FaGraduationCap, number: filieres.length || 4, label: 'Filières', color: 'text-blue-600', bgColor: 'bg-blue-50' },
-              { icon: FaUsers, number: '500+', label: 'Étudiants', color: 'text-emerald-600', bgColor: 'bg-emerald-50' },
-              { icon: FaBook, number: '50+', label: 'Modules', color: 'text-purple-600', bgColor: 'bg-purple-50' },
-              { icon: FaAward, number: '15+', label: 'Années d\'expérience', color: 'text-orange-600', bgColor: 'bg-orange-50' },
+              { icon: FaGraduationCap, number: filieres.length || 4, label: t('home.statistics.filieres'), color: 'text-blue-600', bgColor: 'bg-blue-50' },
+              { icon: FaUsers, number: '500+', label: t('home.statistics.students'), color: 'text-emerald-600', bgColor: 'bg-emerald-50' },
+              { icon: FaBook, number: '50+', label: t('home.statistics.modules'), color: 'text-purple-600', bgColor: 'bg-purple-50' },
+              { icon: FaAward, number: '15+', label: t('home.statistics.yearsExperience'), color: 'text-orange-600', bgColor: 'bg-orange-50' },
             ].map((stat, index) => {
               const Icon = stat.icon;
               return (
@@ -244,18 +263,13 @@ const Home = () => {
               >
                 <div className="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-3xl p-8 h-full">
                   <h2 className="text-4xl font-bold text-text-dark mb-6">
-                    À Propos de Notre Institut
+                    {t('home.aboutTitle')}
                   </h2>
                   <p className="text-gray-700 text-lg leading-relaxed mb-6">
-                    L'Institut Paramédical de Sidi Bel Abbès est un établissement d'enseignement supérieur 
-                    dédié à la formation de professionnels compétents dans le domaine de la santé publique. 
-                    Nous offrons des programmes de formation de qualité qui préparent nos étudiants à 
-                    exceller dans leurs carrières paramédicales.
+                    {t('home.aboutDescription')}
                   </p>
                   <p className="text-gray-700 text-lg leading-relaxed mb-6">
-                    Notre mission est de dispenser une formation d'excellence basée sur les compétences 
-                    professionnelles et les valeurs éthiques, tout en préparant nos étudiants à répondre 
-                    aux besoins croissants du secteur de la santé.
+                    {t('home.mission')}
                   </p>
                   <Link to="/about">
                     <motion.button
@@ -263,7 +277,7 @@ const Home = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      En savoir plus <FaArrowRight />
+                      {t('home.learnMore')} <FaArrowRight />
                     </motion.button>
                   </Link>
                 </div>
@@ -279,10 +293,10 @@ const Home = () => {
                 transition={{ duration: 0.6 }}
               >
                 {[
-                  { icon: FaChalkboardTeacher, title: 'Enseignants Experts', color: 'bg-blue-500' },
-                  { icon: FaLaptopMedical, title: 'Équipements Modernes', color: 'bg-emerald-500' },
-                  { icon: FaHandsHelping, title: 'Accompagnement Personnalisé', color: 'bg-purple-500' },
-                  { icon: FaAward, title: 'Certification Reconnue', color: 'bg-orange-500' },
+                  { icon: FaChalkboardTeacher, title: t('home.aboutFeatures.expertTeachers'), color: 'bg-blue-500' },
+                  { icon: FaLaptopMedical, title: t('home.aboutFeatures.modernEquipment'), color: 'bg-emerald-500' },
+                  { icon: FaHandsHelping, title: t('home.aboutFeatures.personalizedSupport'), color: 'bg-purple-500' },
+                  { icon: FaAward, title: t('home.aboutFeatures.recognizedCertification'), color: 'bg-orange-500' },
                 ].map((item, index) => {
                   const Icon = item.icon;
                   return (
@@ -313,7 +327,7 @@ const Home = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            Pourquoi Choisir Notre Institut ?
+            {t('home.whyChooseUs')}
           </motion.h2>
           <motion.p
             className="text-xl text-gray-600 text-center mb-12 max-w-2xl mx-auto"
@@ -322,29 +336,29 @@ const Home = () => {
             viewport={{ once: true }}
             transition={{ delay: 0.2, duration: 0.6 }}
           >
-            Nous nous engageons à offrir la meilleure expérience éducative possible
+            {t('home.whyChooseUsSubtitle')}
           </motion.p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
                 icon: FaGraduationCap,
-                title: 'Formation de Qualité',
-                description: 'Programmes académiques rigoureux conçus par des experts du secteur médical',
+                title: t('home.features.qualityTraining.title'),
+                description: t('home.features.qualityTraining.description'),
                 color: 'text-blue-600',
                 bgColor: 'bg-blue-50'
               },
               {
                 icon: FaHospital,
-                title: 'Infrastructure Moderne',
-                description: 'Laboratoires équipés des dernières technologies et équipements médicaux',
+                title: t('home.features.modernInfrastructure.title'),
+                description: t('home.features.modernInfrastructure.description'),
                 color: 'text-emerald-600',
                 bgColor: 'bg-emerald-50'
               },
               {
                 icon: FaUserMd,
-                title: 'Expérience Pratique',
-                description: 'Stages cliniques et pratiques dans des établissements de santé partenaires',
+                title: t('home.features.practicalExperience.title'),
+                description: t('home.features.practicalExperience.description'),
                 color: 'text-purple-600',
                 bgColor: 'bg-purple-50'
               },
@@ -380,7 +394,7 @@ const Home = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              Nos Filières de Formation
+              {t('home.programsTitle')}
             </motion.h2>
             <motion.p
               className="text-xl text-gray-600 max-w-2xl mx-auto"
@@ -389,7 +403,7 @@ const Home = () => {
               viewport={{ once: true }}
               transition={{ delay: 0.2, duration: 0.6 }}
             >
-              Découvrez nos programmes de formation conçus pour vous préparer à une carrière réussie dans le secteur de la santé
+              {t('home.programsSubtitle')}
             </motion.p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -403,9 +417,18 @@ const Home = () => {
                     {/* Gradient overlay on hover */}
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     
-                    {/* Icon placeholder */}
-                    <div className="w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center mb-4 relative z-10 shadow-md group-hover:shadow-lg transition-shadow">
-                      <FaGraduationCap className="text-white text-3xl" />
+                    {/* Filière Image */}
+                    <div className="relative h-48 mb-4 rounded-lg overflow-hidden">
+                      <img 
+                        src={getFiliereImage(filiere.slug || filiere.id)} 
+                        alt={filiere.name?.fr}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        onError={(e) => {
+                          console.error('Filière image failed to load:', filiere.slug || filiere.id);
+                          e.target.src = IMAGE_PATHS.FILIERES.NURSING; // Fallback
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-primary/30 to-transparent"></div>
                     </div>
                     
                     <h3 className="text-xl font-bold mb-3 text-text-dark relative z-10 group-hover:text-primary transition-colors">
@@ -421,7 +444,7 @@ const Home = () => {
                       initial={{ x: -10 }}
                       whileHover={{ x: 0 }}
                     >
-                      En savoir plus <FaArrowRight className="ml-2" />
+                      {t('filieres.learnMore')} <FaArrowRight className="ml-2" />
                     </motion.div>
                   </motion.div>
                 </Link>
@@ -442,7 +465,7 @@ const Home = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Voir toutes les filières <FaArrowRight />
+                  {t('home.viewAllPrograms')} <FaArrowRight />
                 </motion.button>
               </Link>
             </motion.div>
@@ -463,7 +486,7 @@ const Home = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.6 }}
                 >
-                  Dernières Annonces
+                  {t('home.announcementsTitle')}
                 </motion.h2>
                 <motion.p
                   className="text-gray-600"
@@ -472,7 +495,7 @@ const Home = () => {
                   viewport={{ once: true }}
                   transition={{ delay: 0.2 }}
                 >
-                  Restez informé des dernières nouvelles de l'institut
+                  {t('home.announcementsSubtitle')}
                 </motion.p>
               </div>
               <Link to="/announcements">
@@ -480,7 +503,7 @@ const Home = () => {
                   className="text-primary font-semibold hover:text-primary-dark flex items-center gap-2"
                   whileHover={{ x: 5 }}
                 >
-                  Voir toutes les annonces <FaArrowRight />
+                  {t('home.viewAllAnnouncements')} <FaArrowRight />
                 </motion.button>
               </Link>
             </div>
@@ -513,7 +536,7 @@ const Home = () => {
                       {announcement.content?.fr?.substring(0, 150)}...
                     </p>
                     <Link to="/announcements" className="text-primary font-semibold text-sm hover:text-primary-dark flex items-center gap-1">
-                      Lire la suite <FaArrowRight className="text-xs" />
+                      {t('home.readMore')} <FaArrowRight className="text-xs" />
                     </Link>
                   </motion.div>
                 </AnimatedCard>
@@ -534,10 +557,10 @@ const Home = () => {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Prêt à Commencer Votre Parcours ?
+              {t('home.ctaTitle')}
             </h2>
             <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
-              Rejoignez notre communauté d'étudiants passionnés et démarrez votre carrière dans le secteur de la santé
+              {t('home.ctaSubtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/filieres">
@@ -546,7 +569,7 @@ const Home = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Explorer nos Programmes
+                  {t('home.explorePrograms')}
                 </motion.button>
               </Link>
               <Link to="/contact">
@@ -555,7 +578,7 @@ const Home = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Nous Contacter
+                  {t('home.contactUs')}
                 </motion.button>
               </Link>
             </div>

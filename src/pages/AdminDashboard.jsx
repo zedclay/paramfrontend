@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
-import { FaUsers, FaFileAlt, FaChartLine, FaBullhorn, FaSearch, FaEdit, FaTrash, FaUpload } from 'react-icons/fa';
+import { FaUsers, FaFileAlt, FaChartLine, FaBullhorn, FaSearch, FaEdit, FaTrash, FaUpload, FaGraduationCap, FaCalendarAlt } from 'react-icons/fa';
 import StudentsManagement from '../components/admin/StudentsManagement';
 import NotesManagement from '../components/admin/NotesManagement';
 import ContentManagement from '../components/admin/ContentManagement';
 import AnnouncementsManagement from '../components/admin/AnnouncementsManagement';
+import AcademicManagement from '../components/admin/AcademicManagement';
+import PlanningManagement from '../components/admin/PlanningManagement';
 
 const AdminDashboard = () => {
   const { user, isAdmin } = useAuth();
@@ -53,6 +55,8 @@ const AdminDashboard = () => {
           <div className="flex space-x-1 overflow-x-auto">
             {[
               { id: 'dashboard', label: 'Tableau de bord', icon: FaChartLine },
+              { id: 'academic', label: 'Structure Académique', icon: FaGraduationCap },
+              { id: 'planning', label: 'Emplois du Temps', icon: FaCalendarAlt },
               { id: 'students', label: 'Étudiants', icon: FaUsers },
               { id: 'notes', label: 'Notes', icon: FaFileAlt },
               { id: 'content', label: 'Contenu', icon: FaEdit },
@@ -141,6 +145,8 @@ const AdminDashboard = () => {
           </div>
         )}
 
+        {activeTab === 'academic' && <AcademicManagement />}
+        {activeTab === 'planning' && <PlanningManagement />}
         {activeTab === 'students' && <StudentsManagement />}
         {activeTab === 'notes' && <NotesManagement />}
         {activeTab === 'content' && <ContentManagement />}

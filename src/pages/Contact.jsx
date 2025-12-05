@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock } from 'react-icons/fa';
+import { IMAGE_PATHS } from '../constants';
 
 const Contact = () => {
+  const { t } = useTranslation();
   const [contactData, setContactData] = useState(null);
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [loading, setLoading] = useState(true);
@@ -31,29 +34,29 @@ const Contact = () => {
 
     // TODO: Implement contact form submission endpoint
     setTimeout(() => {
-      setSubmitStatus({ type: 'success', message: 'Message envoyé avec succès!' });
+      setSubmitStatus({ type: 'success', message: t('contact.messageSent') });
       setFormData({ name: '', email: '', subject: '', message: '' });
       setSubmitting(false);
     }, 1000);
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    return <div className="flex justify-center items-center min-h-screen">{t('common.loading')}</div>;
   }
 
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="text-center mb-12">
-        <h1 className="text-5xl font-bold mb-4 text-text-dark">Contactez-nous</h1>
+        <h1 className="text-5xl font-bold mb-4 text-text-dark">{t('contact.title')}</h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Nous sommes là pour répondre à vos questions
+          {t('contact.subtitle')}
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Contact Information */}
         <div>
-          <h2 className="text-3xl font-bold mb-8 text-text-dark">Informations de contact</h2>
+          <h2 className="text-3xl font-bold mb-8 text-text-dark">{t('contact.contactInfo')}</h2>
           
           <div className="space-y-6">
             <div className="flex items-start">
@@ -61,7 +64,7 @@ const Contact = () => {
                 <FaMapMarkerAlt className="text-primary text-xl" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-1 text-text-dark">Adresse</h3>
+                <h3 className="font-semibold text-lg mb-1 text-text-dark">{t('contact.address')}</h3>
                 <p className="text-gray-600">{contactData?.address || 'Sidi Bel Abbès, Algeria'}</p>
               </div>
             </div>
@@ -71,7 +74,7 @@ const Contact = () => {
                 <FaPhone className="text-primary text-xl" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-1 text-text-dark">Téléphone</h3>
+                <h3 className="font-semibold text-lg mb-1 text-text-dark">{t('contact.phone')}</h3>
                 <p className="text-gray-600">{contactData?.phone || '+213 XX XXX XXXX'}</p>
               </div>
             </div>
@@ -81,7 +84,7 @@ const Contact = () => {
                 <FaEnvelope className="text-primary text-xl" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-1 text-text-dark">Email</h3>
+                <h3 className="font-semibold text-lg mb-1 text-text-dark">{t('contact.email')}</h3>
                 <p className="text-gray-600">{contactData?.email || 'contact@institut-paramedical-sba.dz'}</p>
               </div>
             </div>
@@ -91,7 +94,7 @@ const Contact = () => {
                 <FaClock className="text-primary text-xl" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-1 text-text-dark">Heures d'ouverture</h3>
+                <h3 className="font-semibold text-lg mb-1 text-text-dark">{t('contact.officeHours')}</h3>
                 <p className="text-gray-600">{contactData?.office_hours?.fr || 'Lundi - Vendredi: 8h00 - 17h00'}</p>
               </div>
             </div>
@@ -99,18 +102,27 @@ const Contact = () => {
 
           {/* Map placeholder */}
           <div className="mt-8 bg-gray-200 rounded-lg h-64 flex items-center justify-center">
-            <p className="text-gray-500">Carte à intégrer</p>
+            <img 
+              src={IMAGE_PATHS.CONTACT.LOCATION} 
+              alt={t('contact.mapPlaceholder')}
+              className="w-full h-full object-cover rounded-lg"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+            <p className="text-gray-500" style={{ display: 'none' }}>{t('contact.mapPlaceholder')}</p>
           </div>
         </div>
 
         {/* Contact Form */}
         <div>
-          <h2 className="text-3xl font-bold mb-8 text-text-dark">Envoyez-nous un message</h2>
+          <h2 className="text-3xl font-bold mb-8 text-text-dark">{t('contact.sendMessage')}</h2>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Nom complet
+                {t('contact.fullName')}
               </label>
               <input
                 type="text"
@@ -124,7 +136,7 @@ const Contact = () => {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
+                {t('contact.email')}
               </label>
               <input
                 type="email"
@@ -138,7 +150,7 @@ const Contact = () => {
 
             <div>
               <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                Sujet
+                {t('contact.subject')}
               </label>
               <input
                 type="text"
@@ -152,7 +164,7 @@ const Contact = () => {
 
             <div>
               <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                Message
+                {t('contact.message')}
               </label>
               <textarea
                 id="message"
@@ -177,7 +189,7 @@ const Contact = () => {
               disabled={submitting}
               className="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-dark transition disabled:opacity-50"
             >
-              {submitting ? 'Envoi en cours...' : 'Envoyer le message'}
+              {submitting ? t('contact.sending') : t('contact.sendMessageBtn')}
             </button>
           </form>
         </div>
