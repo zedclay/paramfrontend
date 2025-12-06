@@ -10,9 +10,11 @@ const StudentSchedule = () => {
   const { user, isStudent } = useAuth();
   const navigate = useNavigate();
   const [schedule, setSchedule] = useState(null);
+  const [filieres, setFilieres] = useState([]);
   const [specialities, setSpecialities] = useState([]);
   const [years, setYears] = useState([]);
   const [semesters, setSemesters] = useState([]);
+  const [selectedFiliere, setSelectedFiliere] = useState(null);
   const [selectedSpeciality, setSelectedSpeciality] = useState(null);
   const [selectedYear, setSelectedYear] = useState(null);
   const [selectedSemester, setSelectedSemester] = useState(null);
@@ -25,19 +27,51 @@ const StudentSchedule = () => {
       navigate('/login');
       return;
     }
-    fetchSpecialities();
+    fetchFilieres();
   }, [isStudent, navigate]);
 
-  // Fetch specialties on mount
-  const fetchSpecialities = async () => {
+  // Fetch filieres on mount
+  const fetchFilieres = async () => {
     try {
-      const response = await axios.get('/student/schedule/specialities');
+      const response = await axios.get('/student/schedule/filieres');
+      setFilieres(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching filieres:', error);
+      setFilieres([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch specialties when filiere is selected
+  useEffect(() => {
+    if (selectedFiliere) {
+      fetchSpecialities(selectedFiliere);
+      // Reset specialty, year, and semester when filiere changes
+      setSelectedSpeciality(null);
+      setSelectedYear(null);
+      setSelectedSemester(null);
+      setSpecialities([]);
+      setYears([]);
+      setSemesters([]);
+      setSchedule(null);
+    }
+  }, [selectedFiliere]);
+
+  // Fetch specialties (optionally filtered by filiere)
+  const fetchSpecialities = async (filiereId = null) => {
+    try {
+      setLoadingData(true);
+      const url = filiereId 
+        ? `/student/schedule/specialities?filiere_id=${filiereId}`
+        : '/student/schedule/specialities';
+      const response = await axios.get(url);
       setSpecialities(response.data.data || []);
     } catch (error) {
       console.error('Error fetching specialities:', error);
       setSpecialities([]);
     } finally {
-      setLoading(false);
+      setLoadingData(false);
     }
   };
 
@@ -110,10 +144,13 @@ const StudentSchedule = () => {
         year_id: selectedYear,
         semester_id: selectedSemester,
       };
+      console.log('Fetching schedule with params:', params);
       const response = await axios.get(`/student/schedule`, { params });
+      console.log('Schedule response:', response.data);
       setSchedule(response.data.data);
     } catch (error) {
       console.error('Error fetching schedule:', error);
+      console.error('Error response:', error.response?.data);
       setSchedule({
         error: 'FETCH_ERROR',
         message: `Erreur lors du chargement de l'emploi du temps: ${error.response?.data?.error?.message || error.message}`
@@ -209,7 +246,26 @@ const StudentSchedule = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Selection Dropdowns */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Filière
+              </label>
+              <select
+                value={selectedFiliere || ''}
+                onChange={(e) => setSelectedFiliere(e.target.value ? parseInt(e.target.value) : null)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
+                disabled={loading}
+              >
+                <option value="">Sélectionner une filière</option>
+                {filieres.map(filiere => (
+                  <option key={filiere.id} value={filiere.id}>
+                    {filiere.name?.fr || filiere.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Spécialité
@@ -218,9 +274,15 @@ const StudentSchedule = () => {
                 value={selectedSpeciality || ''}
                 onChange={(e) => setSelectedSpeciality(e.target.value ? parseInt(e.target.value) : null)}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
-                disabled={loading}
+                disabled={!selectedFiliere || loadingData}
               >
-                <option value="">Sélectionner une spécialité</option>
+                <option value="">
+                  {!selectedFiliere 
+                    ? 'Sélectionnez d\'abord une filière' 
+                    : loadingData 
+                      ? 'Chargement...'
+                      : 'Sélectionner une spécialité'}
+                </option>
                 {specialities.map(speciality => (
                   <option key={speciality.id} value={speciality.id}>
                     {speciality.name?.fr || speciality.name}
@@ -447,7 +509,7 @@ const StudentSchedule = () => {
         ) : !selectedSemester ? (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <FaCalendarAlt className="text-5xl text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">Sélectionnez une spécialité, une année et un semestre</p>
+            <p className="text-gray-500 text-lg">Sélectionnez une filière, une spécialité, une année et un semestre</p>
             <p className="text-gray-400 text-sm mt-2">
               Utilisez les menus déroulants ci-dessus pour voir l'emploi du temps
             </p>
@@ -457,8 +519,15 @@ const StudentSchedule = () => {
             <FaCalendarAlt className="text-5xl text-gray-400 mx-auto mb-4" />
             <p className="text-gray-500 text-lg">Aucun emploi du temps disponible</p>
             <p className="text-gray-400 text-sm mt-2">
-              Aucun cours programmé pour ce semestre
+              {schedule?.has_unpublished 
+                ? 'Un emploi du temps existe mais n\'est pas encore publié. Contactez l\'administrateur.'
+                : 'Aucun cours programmé pour ce semestre. Assurez-vous que l\'emploi du temps est publié dans la section admin.'}
             </p>
+            {schedule?.has_unpublished && (
+              <p className="text-yellow-600 text-xs mt-2">
+                💡 L'administrateur doit publier l'emploi du temps pour qu'il soit visible
+              </p>
+            )}
           </div>
         )}
       </div>
