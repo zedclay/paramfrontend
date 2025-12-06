@@ -123,15 +123,30 @@ const PlanningManagement = () => {
       // Fetch schedule image (NEW ARCHITECTURE)
       try {
         const imageResponse = await axios.get(`/admin/schedule-images/${semesterId}`);
+        console.log('Schedule image API response:', imageResponse.data);
         const imageData = imageResponse.data.data;
-        console.log('Fetched schedule image:', imageData);
-        setScheduleImage(imageData);
-      } catch (imageError) {
-        // If no image exists, that's OK
-        if (imageError.response?.status !== 404) {
-          console.error('Error fetching schedule image:', imageError);
+        console.log('Fetched schedule image data:', imageData);
+        
+        // Handle both null and object responses
+        if (imageData && imageData !== null && typeof imageData === 'object') {
+          console.log('Setting schedule image:', imageData);
+          setScheduleImage(imageData);
+        } else {
+          console.log('No schedule image found (data is null or empty)');
+          setScheduleImage(null);
         }
-        setScheduleImage(null);
+      } catch (imageError) {
+        console.error('Error fetching schedule image:', imageError);
+        console.error('Error response:', imageError.response?.data);
+        // If no image exists (404), that's OK
+        if (imageError.response?.status === 404) {
+          console.log('No schedule image exists for this semester (404)');
+          setScheduleImage(null);
+        } else {
+          // Other errors - log but don't break
+          console.error('Unexpected error fetching schedule image');
+          setScheduleImage(null);
+        }
       }
       
       setSelectedPlanning(planning);
@@ -267,17 +282,34 @@ const PlanningManagement = () => {
       console.log('Response success:', response.data?.success);
       console.log('Response data:', response.data?.data);
       
-      if (response.data?.success && response.data?.data?.image_path) {
-        console.log('✅ Schedule image uploaded successfully:', response.data.data.image_path);
-        setImageFile(null);
-        setImagePreview(null);
-        setShowImageUpload(false);
-        // Refresh to show the new image
-        await fetchPlanning(selectedSemester);
-        alert('✅ Image uploadée avec succès!');
+      console.log('=== UPLOAD RESPONSE FULL ===');
+      console.log('Full response:', JSON.stringify(response.data, null, 2));
+      
+      if (response.data?.success) {
+        const uploadedImage = response.data?.data;
+        console.log('Uploaded image data:', uploadedImage);
+        
+        if (uploadedImage && uploadedImage.image_path) {
+          console.log('✅ Schedule image uploaded successfully:', uploadedImage.image_path);
+          // Set the image immediately from response
+          setScheduleImage(uploadedImage);
+          setImageFile(null);
+          setImagePreview(null);
+          setShowImageUpload(false);
+          
+          // Also refresh to ensure consistency
+          await fetchPlanning(selectedSemester);
+          alert('✅ Image uploadée avec succès!');
+        } else {
+          console.warn('⚠️ Upload succeeded but image_path missing in response');
+          console.warn('Response data:', response.data);
+          // Still refresh to try to get the image
+          await fetchPlanning(selectedSemester);
+          alert('✅ Image uploadée! Vérifiez si elle apparaît après rafraîchissement.');
+        }
       } else {
-        console.error('❌ Unexpected response structure:', response.data);
-        alert('⚠️ Réponse inattendue du serveur. Vérifiez la console.');
+        console.error('❌ Upload failed:', response.data);
+        alert('⚠️ Échec de l\'upload. Vérifiez la console.');
       }
     } catch (error) {
       console.error('Error uploading schedule image:', error);
