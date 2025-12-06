@@ -305,23 +305,6 @@ const PlanningManagement = () => {
     }
   };
 
-  const handleDeleteImage = async () => {
-    if (!selectedPlanning || !window.confirm('Êtes-vous sûr de vouloir supprimer cette image ?')) return;
-    
-    try {
-      await axios.put(`/admin/plannings/${selectedPlanning.id}`, {
-        delete_image: true
-      });
-      
-      fetchPlanning(selectedSemester);
-      alert('Image supprimée avec succès!');
-    } catch (error) {
-      console.error('Error deleting image:', error);
-      const errorMsg = error.response?.data?.error?.message || 'Erreur lors de la suppression';
-      alert(`Erreur: ${errorMsg}`);
-    }
-  };
-
   const handleCreateItem = () => {
     setFormData({});
     setEditingItemId(null);
