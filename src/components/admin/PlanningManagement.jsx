@@ -281,15 +281,24 @@ const PlanningManagement = () => {
       });
       
       console.log('=== UPLOAD RESPONSE DEBUG ===');
+      console.log('Response status:', response.status);
+      console.log('Response success:', response.data?.success);
       console.log('Full response object:', response);
       console.log('response.data:', response.data);
       console.log('response.data.data:', response.data?.data);
       console.log('response.data.data?.image_path:', response.data?.data?.image_path);
-      console.log('Response status:', response.status);
-      console.log('Response success:', response.data?.success);
+      console.log('response.data.data?.image_path type:', typeof response.data?.data?.image_path);
+      console.log('response.data.data?.image_path value:', response.data?.data?.image_path);
+      console.log('response.data.data?.image_path === null:', response.data?.data?.image_path === null);
+      console.log('response.data.data?.image_path === "":', response.data?.data?.image_path === '');
       
       // Log the entire response structure for debugging
       console.log('Full response JSON:', JSON.stringify(response.data, null, 2));
+      
+      // Also log the raw response if available
+      if (response.request?.response) {
+        console.log('Raw response text:', response.request.response);
+      }
       
       // Check multiple possible response structures - be more thorough
       let imagePath = null;
