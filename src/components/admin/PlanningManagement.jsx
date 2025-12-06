@@ -281,24 +281,42 @@ const PlanningManagement = () => {
       });
       
       console.log('=== UPLOAD RESPONSE DEBUG ===');
-      console.log('Full response:', response);
+      console.log('Full response object:', response);
       console.log('response.data:', response.data);
       console.log('response.data.data:', response.data?.data);
       console.log('response.data.data?.image_path:', response.data?.data?.image_path);
-      console.log('All keys in response.data:', response.data ? Object.keys(response.data) : 'no data');
-      console.log('All keys in response.data.data:', response.data?.data ? Object.keys(response.data.data) : 'no data.data');
-      
-      // Check multiple possible response structures
-      const imagePath = response.data?.data?.image_path 
-        || response.data?.image_path 
-        || (response.data?.data && typeof response.data.data === 'object' && response.data.data.image_path);
-      
-      console.log('Extracted image_path:', imagePath);
       console.log('Response status:', response.status);
       console.log('Response success:', response.data?.success);
       
+      // Log the entire response structure for debugging
+      console.log('Full response JSON:', JSON.stringify(response.data, null, 2));
+      
+      // Check multiple possible response structures - be more thorough
+      let imagePath = null;
+      
+      // Try response.data.data.image_path first (standard structure)
+      if (response.data?.data?.image_path) {
+        imagePath = response.data.data.image_path;
+        console.log('Found image_path in response.data.data.image_path');
+      }
+      // Try response.data.image_path (alternative structure)
+      else if (response.data?.image_path) {
+        imagePath = response.data.image_path;
+        console.log('Found image_path in response.data.image_path');
+      }
+      // Try nested object access
+      else if (response.data?.data && typeof response.data.data === 'object') {
+        imagePath = response.data.data.image_path;
+        console.log('Tried nested object access');
+      }
+      
+      console.log('Extracted image_path:', imagePath);
+      console.log('image_path type:', typeof imagePath);
+      console.log('image_path truthy check:', !!imagePath);
+      console.log('image_path empty check:', imagePath === '' || imagePath === null || imagePath === undefined);
+      
       // Verify image_path was saved
-      if (imagePath && imagePath !== null && imagePath !== '') {
+      if (imagePath && imagePath !== null && imagePath !== '' && imagePath !== undefined) {
         console.log('✅ Image path saved:', imagePath);
         setImageFile(null);
         setImagePreview(null);
@@ -306,18 +324,30 @@ const PlanningManagement = () => {
         // Refresh planning to show the image
         await fetchPlanning(selectedSemester);
         alert('✅ Image uploadée avec succès!');
-      } else {
-        console.error('❌ Image path not in response. Full response structure:');
-        console.error('Full response.data:', JSON.stringify(response.data, null, 2));
-        console.error('response.data.data type:', typeof response.data?.data);
-        console.error('response.data.data value:', response.data?.data);
+        return; // Exit early on success
+      }
+      
+      // If we get here, image_path was not in response
+      console.error('❌ Image path not in response. Full response structure:');
+      console.error('Full response.data:', JSON.stringify(response.data, null, 2));
+      console.error('response.data.data type:', typeof response.data?.data);
+      console.error('response.data.data value:', response.data?.data);
+      console.error('All keys in response.data:', response.data ? Object.keys(response.data) : 'no data');
+      console.error('All keys in response.data.data:', response.data?.data ? Object.keys(response.data.data) : 'no data.data');
+      
+      // Try to refresh anyway - maybe the image was saved but not in response
+      console.log('Refreshing planning to check if image_path is available...');
+      await fetchPlanning(selectedSemester);
+      
+      // Check if image_path is now available after refresh
+      // Wait a bit for state to update
+      setTimeout(() => {
+        const refreshedPlanning = selectedPlanning;
+        console.log('Refreshed planning:', refreshedPlanning);
+        console.log('Refreshed planning image_path:', refreshedPlanning?.image_path);
         
-        // Try to refresh anyway - maybe the image was saved but not in response
-        await fetchPlanning(selectedSemester);
-        
-        // Check if image_path is now available after refresh
-        if (selectedPlanning?.image_path) {
-          console.log('✅ Image path found after refresh:', selectedPlanning.image_path);
+        if (refreshedPlanning?.image_path) {
+          console.log('✅ Image path found after refresh:', refreshedPlanning.image_path);
           setImageFile(null);
           setImagePreview(null);
           setShowImageUpload(false);
@@ -325,7 +355,7 @@ const PlanningManagement = () => {
         } else {
           alert('⚠️ Upload réussi mais image_path non sauvegardé. Vérifiez les logs serveur et la console.');
         }
-      }
+      }, 500);
     } catch (error) {
       console.error('Error uploading image:', error);
       console.error('Error response:', error.response?.data);
