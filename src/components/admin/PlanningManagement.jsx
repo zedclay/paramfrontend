@@ -116,11 +116,21 @@ const PlanningManagement = () => {
       });
       const planning = response.data.data?.[0] || null;
       console.log('Fetched planning:', planning);
+      console.log('Planning image_path:', planning?.image_path);
+      console.log('Planning is_published:', planning?.is_published);
+      
       setSelectedPlanning(planning);
       if (planning) {
         fetchPlanningItems(planning.id);
         // Reset image preview when planning changes
         setImagePreview(null);
+        
+        // Debug: Log if image_path is missing
+        if (!planning.image_path) {
+          console.warn('⚠️ Planning exists but image_path is NULL or empty');
+          console.warn('Planning ID:', planning.id);
+          console.warn('Planning data:', planning);
+        }
       }
     } catch (error) {
       console.error('Error fetching planning:', error);
@@ -271,12 +281,23 @@ const PlanningManagement = () => {
       });
       
       console.log('Upload response:', response.data);
+      console.log('Planning data:', response.data.data);
       
-      setImageFile(null);
-      setImagePreview(null);
-      setShowImageUpload(false);
-      fetchPlanning(selectedSemester);
-      alert('Image uploadée avec succès!');
+      // Verify image_path was saved
+      if (response.data.data && response.data.data.image_path) {
+        console.log('✅ Image path saved:', response.data.data.image_path);
+        setImageFile(null);
+        setImagePreview(null);
+        setShowImageUpload(false);
+        // Refresh planning to show the image
+        await fetchPlanning(selectedSemester);
+        alert('✅ Image uploadée avec succès!');
+      } else {
+        console.error('❌ Image path not in response:', response.data);
+        alert('⚠️ Upload réussi mais image_path non sauvegardé. Vérifiez les logs serveur.');
+        // Still refresh to see current state
+        await fetchPlanning(selectedSemester);
+      }
     } catch (error) {
       console.error('Error uploading image:', error);
       console.error('Error response:', error.response?.data);
