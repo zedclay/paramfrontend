@@ -355,20 +355,27 @@ const StudentSchedule = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-gray-600">Chargement...</p>
           </div>
-        ) : schedule && schedule.planning?.image_path ? (
-          // Display image if available
+        ) : schedule && schedule.schedule_image ? (
+          // Display schedule image if available (NEW ARCHITECTURE)
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-2xl font-bold mb-6 text-text-dark">Emploi du Temps</h2>
-            <div className="flex justify-center">
+            <div className="flex justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-lg border-2 border-gray-200">
               <img 
-                src={schedule.planning.image_path.startsWith('http') 
-                  ? schedule.planning.image_path 
-                  : `${window.location.protocol}//${window.location.host}/api/storage/${schedule.planning.image_path.replace('public/', '')}`}
+                src={schedule.schedule_image.image_url || 
+                  (schedule.schedule_image.image_path?.startsWith('http') 
+                    ? schedule.schedule_image.image_path 
+                    : `${window.location.protocol}//${window.location.host}/storage/${schedule.schedule_image.image_path}`)}
                 alt="Emploi du temps" 
-                className="max-w-full h-auto border rounded-lg shadow-lg"
+                className="max-w-full h-auto border-4 border-white rounded-lg shadow-2xl"
+                style={{ maxHeight: '80vh' }}
                 onError={(e) => {
-                  // Fallback: try without /api prefix
-                  if (e.target.src.includes('/api/storage/')) {
+                  console.error('Image load error:', e);
+                  console.error('Image path:', schedule.schedule_image.image_path);
+                  console.error('Image URL:', schedule.schedule_image.image_url);
+                  // Fallback: try different URL formats
+                  if (e.target.src.includes('/storage/')) {
+                    e.target.src = e.target.src.replace('/storage/', '/api/storage/');
+                  } else if (e.target.src.includes('/api/storage/')) {
                     e.target.src = e.target.src.replace('/api/storage/', '/storage/');
                   }
                 }}
