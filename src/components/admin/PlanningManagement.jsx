@@ -280,12 +280,24 @@ const PlanningManagement = () => {
         },
       });
       
-      console.log('Upload response:', response.data);
-      console.log('Planning data:', response.data.data);
+      console.log('=== UPLOAD RESPONSE DEBUG ===');
+      console.log('Full response:', response);
+      console.log('response.data:', response.data);
+      console.log('response.data.data:', response.data?.data);
+      console.log('response.data.data?.image_path:', response.data?.data?.image_path);
+      console.log('All keys in response.data:', response.data ? Object.keys(response.data) : 'no data');
+      console.log('All keys in response.data.data:', response.data?.data ? Object.keys(response.data.data) : 'no data.data');
+      
+      // Check multiple possible response structures
+      const imagePath = response.data?.data?.image_path 
+        || response.data?.image_path 
+        || (response.data?.data && typeof response.data.data === 'object' && response.data.data.image_path);
+      
+      console.log('Extracted image_path:', imagePath);
       
       // Verify image_path was saved
-      if (response.data.data && response.data.data.image_path) {
-        console.log('✅ Image path saved:', response.data.data.image_path);
+      if (imagePath) {
+        console.log('✅ Image path saved:', imagePath);
         setImageFile(null);
         setImagePreview(null);
         setShowImageUpload(false);
@@ -293,8 +305,9 @@ const PlanningManagement = () => {
         await fetchPlanning(selectedSemester);
         alert('✅ Image uploadée avec succès!');
       } else {
-        console.error('❌ Image path not in response:', response.data);
-        alert('⚠️ Upload réussi mais image_path non sauvegardé. Vérifiez les logs serveur.');
+        console.error('❌ Image path not in response. Full response structure:');
+        console.error('response:', JSON.stringify(response.data, null, 2));
+        alert('⚠️ Upload réussi mais image_path non sauvegardé. Vérifiez les logs serveur et la console.');
         // Still refresh to see current state
         await fetchPlanning(selectedSemester);
       }
