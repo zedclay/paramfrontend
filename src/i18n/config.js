@@ -22,6 +22,7 @@ i18n
       },
     },
     fallbackLng: 'fr',
+    lng: 'fr', // Set French as default language
     defaultNS: 'translation',
     interpolation: {
       escapeValue: false,
@@ -29,6 +30,7 @@ i18n
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
+      lookupLocalStorage: 'i18nextLng',
     },
   });
 

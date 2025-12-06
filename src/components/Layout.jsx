@@ -12,6 +12,8 @@ const Layout = ({ children, locale, changeLocale }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [academicDropdownOpen, setAcademicDropdownOpen] = useState(false);
   const [mobileAcademicOpen, setMobileAcademicOpen] = useState(false);
+  const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
+  const [mobileLanguageOpen, setMobileLanguageOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -151,27 +153,59 @@ const Layout = ({ children, locale, changeLocale }) => {
                 </Link>
               </motion.div>
 
-              {/* Language Switcher */}
-              <div className="flex items-center space-x-2 border-l pl-4">
-                <FaGlobe className="text-gray-600" />
-                <button
-                  onClick={() => changeLocale('en')}
-                  className={`px-2 py-1 rounded ${i18n.language === 'en' ? 'bg-primary text-white' : 'text-gray-600'}`}
-                >
-                  EN
+              {/* Language Switcher - FR First with Dropdown */}
+              <div
+                className="relative border-l pl-4"
+                onMouseEnter={() => setLanguageDropdownOpen(true)}
+                onMouseLeave={() => setLanguageDropdownOpen(false)}
+              >
+                <button className="flex items-center space-x-2 px-3 py-1 rounded hover:bg-gray-100 transition-colors">
+                  <FaGlobe className="text-gray-600" />
+                  <span className="font-medium text-gray-700">
+                    {i18n.language === 'fr' ? 'FR' : i18n.language === 'en' ? 'EN' : 'AR'}
+                  </span>
+                  <FaChevronDown className={`text-xs text-gray-500 transition-transform ${languageDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
-                <button
-                  onClick={() => changeLocale('fr')}
-                  className={`px-2 py-1 rounded ${i18n.language === 'fr' ? 'bg-primary text-white' : 'text-gray-600'}`}
-                >
-                  FR
-                </button>
-                <button
-                  onClick={() => changeLocale('ar')}
-                  className={`px-2 py-1 rounded ${i18n.language === 'ar' ? 'bg-primary text-white' : 'text-gray-600'}`}
-                >
-                  AR
-                </button>
+                
+                <AnimatePresence>
+                  {languageDropdownOpen && (
+                    <motion.div
+                      className="absolute top-full right-0 mt-2 w-32 bg-white rounded-lg shadow-lg py-2 z-50"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <button
+                        onClick={() => {
+                          changeLocale('fr');
+                          setLanguageDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors ${i18n.language === 'fr' ? 'bg-primary text-white font-semibold' : 'text-gray-700'}`}
+                      >
+                        Français (FR)
+                      </button>
+                      <button
+                        onClick={() => {
+                          changeLocale('en');
+                          setLanguageDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors ${i18n.language === 'en' ? 'bg-primary text-white font-semibold' : 'text-gray-700'}`}
+                      >
+                        English (EN)
+                      </button>
+                      <button
+                        onClick={() => {
+                          changeLocale('ar');
+                          setLanguageDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors ${i18n.language === 'ar' ? 'bg-primary text-white font-semibold' : 'text-gray-700'}`}
+                      >
+                        العربية (AR)
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Auth Buttons */}
@@ -201,19 +235,74 @@ const Layout = ({ children, locale, changeLocale }) => {
             </div>
 
             {/* Mobile Menu Button */}
-            <button
-              className="md:hidden text-gray-700"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-            </button>
+            <div className="md:hidden flex items-center space-x-3">
+              {/* Language Switcher for Mobile (Visible when menu closed) */}
+              {!mobileMenuOpen && (
+                <div className="relative">
+                  <button
+                    onClick={() => setMobileLanguageOpen(!mobileLanguageOpen)}
+                    className="flex items-center space-x-1 px-2 py-1 text-gray-700"
+                  >
+                    <FaGlobe className="text-gray-600" />
+                    <span className="text-sm font-medium">
+                      {i18n.language === 'fr' ? 'FR' : i18n.language === 'en' ? 'EN' : 'AR'}
+                    </span>
+                  </button>
+                  <AnimatePresence>
+                    {mobileLanguageOpen && (
+                      <motion.div
+                        className="absolute top-full right-0 mt-1 w-32 bg-white rounded-lg shadow-lg py-2 z-50"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <button
+                          onClick={() => {
+                            changeLocale('fr');
+                            setMobileLanguageOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors ${i18n.language === 'fr' ? 'bg-primary text-white font-semibold' : 'text-gray-700'}`}
+                        >
+                          FR
+                        </button>
+                        <button
+                          onClick={() => {
+                            changeLocale('en');
+                            setMobileLanguageOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors ${i18n.language === 'en' ? 'bg-primary text-white font-semibold' : 'text-gray-700'}`}
+                        >
+                          EN
+                        </button>
+                        <button
+                          onClick={() => {
+                            changeLocale('ar');
+                            setMobileLanguageOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-2 text-sm hover:bg-primary hover:text-white transition-colors ${i18n.language === 'ar' ? 'bg-primary text-white font-semibold' : 'text-gray-700'}`}
+                        >
+                          AR
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+              <button
+                className="text-gray-700 hover:text-primary transition"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                {mobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+              </button>
+            </div>
           </div>
 
           {/* Mobile Menu */}
           <AnimatePresence>
             {mobileMenuOpen && (
               <motion.div
-                className="md:hidden mt-4 space-y-2"
+                className="md:hidden mt-4 pb-4 space-y-2 border-t pt-4 max-h-[calc(100vh-120px)] overflow-y-auto"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
@@ -225,7 +314,11 @@ const Layout = ({ children, locale, changeLocale }) => {
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0 * 0.05 }}
                 >
-                  <Link to="/" className="block py-2 text-gray-700 hover:text-primary transition">
+                  <Link 
+                    to="/" 
+                    className="block py-2 text-gray-700 hover:text-primary transition"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     {t('nav.home')}
                   </Link>
                 </motion.div>
@@ -236,7 +329,11 @@ const Layout = ({ children, locale, changeLocale }) => {
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 1 * 0.05 }}
                 >
-                  <Link to="/about" className="block py-2 text-gray-700 hover:text-primary transition">
+                  <Link 
+                    to="/about" 
+                    className="block py-2 text-gray-700 hover:text-primary transition"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     {t('nav.about')}
                   </Link>
                 </motion.div>
@@ -263,13 +360,34 @@ const Layout = ({ children, locale, changeLocale }) => {
                         transition={{ duration: 0.2 }}
                         className="pl-4 space-y-1"
                       >
-                        <Link to="/filieres" className="block py-2 text-gray-600 hover:text-primary transition">
+                        <Link 
+                          to="/filieres" 
+                          className="block py-2 text-gray-600 hover:text-primary transition"
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            setMobileAcademicOpen(false);
+                          }}
+                        >
                           {t('nav.filieres')}
                         </Link>
-                        <Link to="/specialites" className="block py-2 text-gray-600 hover:text-primary transition">
+                        <Link 
+                          to="/specialites" 
+                          className="block py-2 text-gray-600 hover:text-primary transition"
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            setMobileAcademicOpen(false);
+                          }}
+                        >
                           {t('nav.specialites')}
                         </Link>
-                        <Link to="/modules" className="block py-2 text-gray-600 hover:text-primary transition">
+                        <Link 
+                          to="/modules" 
+                          className="block py-2 text-gray-600 hover:text-primary transition"
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            setMobileAcademicOpen(false);
+                          }}
+                        >
                           {t('nav.modules')}
                         </Link>
                       </motion.div>
@@ -283,7 +401,11 @@ const Layout = ({ children, locale, changeLocale }) => {
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 3 * 0.05 }}
                 >
-                  <Link to="/announcements" className="block py-2 text-gray-700 hover:text-primary transition">
+                  <Link 
+                    to="/announcements" 
+                    className="block py-2 text-gray-700 hover:text-primary transition"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     {t('nav.announcements')}
                   </Link>
                 </motion.div>
@@ -294,10 +416,73 @@ const Layout = ({ children, locale, changeLocale }) => {
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 4 * 0.05 }}
                 >
-                  <Link to="/contact" className="block py-2 text-gray-700 hover:text-primary transition">
+                  <Link 
+                    to="/contact" 
+                    className="block py-2 text-gray-700 hover:text-primary transition"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     {t('nav.contact')}
                   </Link>
                 </motion.div>
+
+                {/* Language Switcher (Mobile) */}
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 5 * 0.05 }}
+                  className="border-t pt-2 mt-2"
+                >
+                  <button
+                    onClick={() => setMobileLanguageOpen(!mobileLanguageOpen)}
+                    className="w-full flex items-center justify-between py-2 text-gray-700 hover:text-primary transition"
+                  >
+                    <span className="flex items-center space-x-2">
+                      <FaGlobe className="text-gray-600" />
+                      <span>{i18n.language === 'fr' ? 'FR' : i18n.language === 'en' ? 'EN' : 'AR'}</span>
+                    </span>
+                    <FaChevronDown className={`text-xs transition-transform ${mobileLanguageOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  <AnimatePresence>
+                    {mobileLanguageOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="pl-4 space-y-1"
+                      >
+                        <button
+                          onClick={() => {
+                            changeLocale('fr');
+                            setMobileLanguageOpen(false);
+                          }}
+                          className={`w-full text-left block py-2 text-sm ${i18n.language === 'fr' ? 'text-primary font-semibold' : 'text-gray-600 hover:text-primary'} transition`}
+                        >
+                          Français (FR)
+                        </button>
+                        <button
+                          onClick={() => {
+                            changeLocale('en');
+                            setMobileLanguageOpen(false);
+                          }}
+                          className={`w-full text-left block py-2 text-sm ${i18n.language === 'en' ? 'text-primary font-semibold' : 'text-gray-600 hover:text-primary'} transition`}
+                        >
+                          English (EN)
+                        </button>
+                        <button
+                          onClick={() => {
+                            changeLocale('ar');
+                            setMobileLanguageOpen(false);
+                          }}
+                          className={`w-full text-left block py-2 text-sm ${i18n.language === 'ar' ? 'text-primary font-semibold' : 'text-gray-600 hover:text-primary'} transition`}
+                        >
+                          العربية (AR)
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+
                 {isAuthenticated ? (
                   <>
                     <motion.div
@@ -308,6 +493,7 @@ const Layout = ({ children, locale, changeLocale }) => {
                       <Link
                         to={user?.role === 'admin' ? '/admin/dashboard' : '/student/dashboard'}
                         className="block py-2 text-primary"
+                        onClick={() => setMobileMenuOpen(false)}
                       >
                         {t('nav.dashboard')}
                       </Link>
@@ -328,7 +514,13 @@ const Layout = ({ children, locale, changeLocale }) => {
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.3 }}
                   >
-                    <Link to="/login" className="block py-2 text-primary">{t('nav.login')}</Link>
+                    <Link 
+                      to="/login" 
+                      className="block py-2 text-primary"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {t('nav.login')}
+                    </Link>
                   </motion.div>
                 )}
               </motion.div>
