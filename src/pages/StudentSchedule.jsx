@@ -169,8 +169,15 @@ const StudentSchedule = () => {
                 value={selectedSemester || ''}
                 onChange={(e) => setSelectedSemester(parseInt(e.target.value))}
                 className="border border-gray-300 rounded-lg px-4 py-2"
+                disabled={!user?.year_id || !user?.group_id || semesters.length === 0}
               >
-                <option value="">Sélectionner un semestre</option>
+                <option value="">
+                  {!user?.year_id || !user?.group_id 
+                    ? 'Assignez année/groupe d\'abord' 
+                    : semesters.length === 0 
+                      ? 'Aucun semestre disponible'
+                      : 'Sélectionner un semestre'}
+                </option>
                 {semesters.map(semester => (
                   <option key={semester.id} value={semester.id}>
                     {semester.name?.fr || `Semestre ${semester.semester_number}`} - {semester.academic_year}
