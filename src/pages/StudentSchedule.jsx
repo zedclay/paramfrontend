@@ -20,8 +20,13 @@ const StudentSchedule = () => {
       navigate('/login');
       return;
     }
-    fetchSemesters();
-  }, [isStudent, navigate]);
+    
+    // Wait for user data to be loaded before fetching schedule
+    if (user) {
+      // Fetch schedule first (without semester_id to get current semester and available semesters)
+      fetchSchedule(null);
+    }
+  }, [isStudent, navigate, user]);
 
   useEffect(() => {
     if (selectedSemester) {
@@ -29,38 +34,53 @@ const StudentSchedule = () => {
     }
   }, [selectedSemester]);
 
-  const fetchSemesters = async () => {
-    try {
-      // Get semesters for student's year
-      const response = await axios.get(`/student/schedule/semesters`);
-      const semestersData = response.data.data || [];
-      setSemesters(semestersData);
-      // Auto-select current semester
-      const currentSemester = semestersData.find(s => {
-        const start = new Date(s.start_date);
-        const end = new Date(s.end_date);
-        const today = new Date();
-        return today >= start && today <= end;
-      }) || semestersData[0];
-      if (currentSemester) {
-        setSelectedSemester(currentSemester.id);
-      }
-    } catch (error) {
-      console.error('Error fetching semesters:', error);
-      setSemesters([]);
-    }
-  };
-
   const fetchSchedule = async (semesterId) => {
     setLoading(true);
     try {
-      const response = await axios.get(`/student/schedule`, {
-        params: { semester_id: semesterId }
-      });
-      setSchedule(response.data.data);
+      const params = semesterId ? { semester_id: semesterId } : {};
+      const response = await axios.get(`/student/schedule`, { params });
+      
+      const scheduleData = response.data.data;
+      setSchedule(scheduleData);
+      
+      // Update available semesters from response
+      if (scheduleData.available_semesters && Array.isArray(scheduleData.available_semesters)) {
+        setSemesters(scheduleData.available_semesters);
+        
+        // Auto-select current semester if not already selected
+        if (!selectedSemester && scheduleData.semester) {
+          setSelectedSemester(scheduleData.semester.id);
+        } else if (!selectedSemester && scheduleData.available_semesters.length > 0) {
+          // Select first available semester if no current semester
+          setSelectedSemester(scheduleData.available_semesters[0].id);
+        }
+      }
     } catch (error) {
       console.error('Error fetching schedule:', error);
-      setSchedule(null);
+      console.error('Error response:', error.response?.data);
+      console.error('User data:', user);
+      
+      const errorMessage = error.response?.data?.error?.message || error.message;
+      const errorCode = error.response?.data?.error?.code;
+      
+      // Handle missing year/group assignment
+      if (error.response?.status === 400 && (errorCode === 'MISSING_INFO' || errorMessage?.includes('year and group'))) {
+        setSchedule({
+          error: 'MISSING_INFO',
+          message: 'Vous devez être assigné à une année et un groupe pour voir votre emploi du temps. Veuillez contacter l\'administrateur.'
+        });
+        setSemesters([]);
+      } else if (error.response?.status === 401 || error.response?.status === 403) {
+        setSchedule({
+          error: 'AUTH_ERROR',
+          message: 'Vous devez être connecté pour voir votre emploi du temps.'
+        });
+      } else {
+        setSchedule({
+          error: 'FETCH_ERROR',
+          message: `Erreur lors du chargement de l'emploi du temps: ${errorMessage}`
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -128,8 +148,20 @@ const StudentSchedule = () => {
             <div>
               <h1 className="text-3xl font-bold text-text-dark">Mon Emploi du Temps</h1>
               <p className="text-gray-600 mt-1">
-                {user?.year?.name?.fr || `Année ${user?.year?.year_number || ''}`} - 
-                {user?.group?.name ? ` Groupe ${user.group.name}` : ''}
+                {user?.year?.name?.fr 
+                  ? user.year.name.fr 
+                  : user?.year?.year_number 
+                    ? `Année ${user.year.year_number}` 
+                    : user?.year_id 
+                      ? `Année ID: ${user.year_id}` 
+                      : 'Non assigné'} - 
+                {user?.group?.name 
+                  ? `Groupe ${user.group.name}` 
+                  : user?.group?.code 
+                    ? `Groupe ${user.group.code}` 
+                    : user?.group_id 
+                      ? `Groupe ID: ${user.group_id}` 
+                      : 'Non assigné'}
               </p>
             </div>
             <div className="flex gap-4">
@@ -179,9 +211,15 @@ const StudentSchedule = () => {
               <img 
                 src={schedule.planning.image_path.startsWith('http') 
                   ? schedule.planning.image_path 
-                  : `${window.location.protocol}//${window.location.host}/storage/${schedule.planning.image_path}`}
+                  : `${window.location.protocol}//${window.location.host}/api/storage/${schedule.planning.image_path.replace('public/', '')}`}
                 alt="Emploi du temps" 
                 className="max-w-full h-auto border rounded-lg shadow-lg"
+                onError={(e) => {
+                  // Fallback: try without /api prefix
+                  if (e.target.src.includes('/api/storage/')) {
+                    e.target.src = e.target.src.replace('/api/storage/', '/storage/');
+                  }
+                }}
               />
             </div>
           </div>
@@ -308,12 +346,46 @@ const StudentSchedule = () => {
               </div>
             )}
           </div>
+        ) : schedule?.error ? (
+          <div className="bg-white rounded-lg shadow-md p-12 text-center">
+            <FaCalendarAlt className={`text-5xl mx-auto mb-4 ${
+              schedule.error === 'MISSING_INFO' ? 'text-red-400' : 
+              schedule.error === 'AUTH_ERROR' ? 'text-yellow-400' : 
+              'text-gray-400'
+            }`} />
+            <p className={`text-lg font-semibold mb-2 ${
+              schedule.error === 'MISSING_INFO' ? 'text-red-500' : 
+              schedule.error === 'AUTH_ERROR' ? 'text-yellow-600' : 
+              'text-gray-600'
+            }`}>
+              {schedule.error === 'MISSING_INFO' ? 'Information manquante' :
+               schedule.error === 'AUTH_ERROR' ? 'Erreur d\'authentification' :
+               'Erreur'}
+            </p>
+            <p className="text-gray-600 text-sm mb-4">
+              {schedule.message || 'Une erreur est survenue lors du chargement de l\'emploi du temps.'}
+            </p>
+            {schedule.error === 'MISSING_INFO' && (
+              <>
+                <p className="text-gray-500 text-xs mb-2">
+                  Votre compte n'est pas correctement configuré. Informations manquantes:
+                </p>
+                <div className="text-left inline-block bg-gray-50 p-4 rounded text-xs text-gray-600">
+                  <p>• Année ID: {user?.year_id || '❌ Non assigné'}</p>
+                  <p>• Groupe ID: {user?.group_id || '❌ Non assigné'}</p>
+                </div>
+                <p className="text-gray-400 text-xs mt-4">
+                  Contactez l'administrateur pour résoudre ce problème.
+                </p>
+              </>
+            )}
+          </div>
         ) : (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <FaCalendarAlt className="text-5xl text-gray-400 mx-auto mb-4" />
             <p className="text-gray-500 text-lg">Aucun emploi du temps disponible</p>
             <p className="text-gray-400 text-sm mt-2">
-              {selectedSemester ? 'Aucun cours programmé pour ce semestre' : 'Sélectionnez un semestre'}
+              {selectedSemester ? 'Aucun cours programmé pour ce semestre' : 'Chargement...'}
             </p>
           </div>
         )}
