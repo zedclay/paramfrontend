@@ -339,23 +339,31 @@ const PlanningManagement = () => {
       console.log('Refreshing planning to check if image_path is available...');
       await fetchPlanning(selectedSemester);
       
-      // Check if image_path is now available after refresh
-      // Wait a bit for state to update
-      setTimeout(() => {
-        const refreshedPlanning = selectedPlanning;
-        console.log('Refreshed planning:', refreshedPlanning);
-        console.log('Refreshed planning image_path:', refreshedPlanning?.image_path);
-        
-        if (refreshedPlanning?.image_path) {
-          console.log('✅ Image path found after refresh:', refreshedPlanning.image_path);
-          setImageFile(null);
-          setImagePreview(null);
-          setShowImageUpload(false);
-          alert('✅ Image uploadée avec succès! (récupérée après rafraîchissement)');
-        } else {
-          alert('⚠️ Upload réussi mais image_path non sauvegardé. Vérifiez les logs serveur et la console.');
-        }
-      }, 500);
+      // Wait a moment for state to update, then check
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Re-fetch planning to get fresh data
+      const refreshResponse = await axios.get(`/admin/plannings`, {
+        params: { semester_id: selectedSemester }
+      });
+      const refreshedPlanning = refreshResponse.data.data?.[0] || null;
+      
+      console.log('Refreshed planning from API:', refreshedPlanning);
+      console.log('Refreshed planning image_path:', refreshedPlanning?.image_path);
+      
+      if (refreshedPlanning?.image_path) {
+        console.log('✅ Image path found after refresh:', refreshedPlanning.image_path);
+        setSelectedPlanning(refreshedPlanning);
+        setImageFile(null);
+        setImagePreview(null);
+        setShowImageUpload(false);
+        alert('✅ Image uploadée avec succès! (récupérée après rafraîchissement)');
+      } else {
+        // Last resort: check if the upload actually succeeded by checking the file exists
+        console.error('❌ Image path still not found after refresh');
+        console.error('Full refresh response:', JSON.stringify(refreshResponse.data, null, 2));
+        alert('⚠️ Upload réussi mais image_path non sauvegardé. Vérifiez les logs serveur et la console.\n\nVérifiez aussi si l\'image apparaît après un rafraîchissement de la page.');
+      }
     } catch (error) {
       console.error('Error uploading image:', error);
       console.error('Error response:', error.response?.data);
