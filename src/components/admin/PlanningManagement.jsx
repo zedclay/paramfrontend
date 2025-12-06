@@ -294,9 +294,11 @@ const PlanningManagement = () => {
         || (response.data?.data && typeof response.data.data === 'object' && response.data.data.image_path);
       
       console.log('Extracted image_path:', imagePath);
+      console.log('Response status:', response.status);
+      console.log('Response success:', response.data?.success);
       
       // Verify image_path was saved
-      if (imagePath) {
+      if (imagePath && imagePath !== null && imagePath !== '') {
         console.log('✅ Image path saved:', imagePath);
         setImageFile(null);
         setImagePreview(null);
@@ -306,10 +308,23 @@ const PlanningManagement = () => {
         alert('✅ Image uploadée avec succès!');
       } else {
         console.error('❌ Image path not in response. Full response structure:');
-        console.error('response:', JSON.stringify(response.data, null, 2));
-        alert('⚠️ Upload réussi mais image_path non sauvegardé. Vérifiez les logs serveur et la console.');
-        // Still refresh to see current state
+        console.error('Full response.data:', JSON.stringify(response.data, null, 2));
+        console.error('response.data.data type:', typeof response.data?.data);
+        console.error('response.data.data value:', response.data?.data);
+        
+        // Try to refresh anyway - maybe the image was saved but not in response
         await fetchPlanning(selectedSemester);
+        
+        // Check if image_path is now available after refresh
+        if (selectedPlanning?.image_path) {
+          console.log('✅ Image path found after refresh:', selectedPlanning.image_path);
+          setImageFile(null);
+          setImagePreview(null);
+          setShowImageUpload(false);
+          alert('✅ Image uploadée avec succès! (récupérée après rafraîchissement)');
+        } else {
+          alert('⚠️ Upload réussi mais image_path non sauvegardé. Vérifiez les logs serveur et la console.');
+        }
       }
     } catch (error) {
       console.error('Error uploading image:', error);
