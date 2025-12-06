@@ -31,24 +31,23 @@ const StudentSchedule = () => {
 
   const fetchSemesters = async () => {
     try {
-      // Get current semester from student's year
-      if (user?.year_id) {
-        const response = await axios.get(`/admin/years/${user.year_id}/semesters`);
-        const semestersData = response.data.data || [];
-        setSemesters(semestersData);
-        // Auto-select current semester
-        const currentSemester = semestersData.find(s => {
-          const start = new Date(s.start_date);
-          const end = new Date(s.end_date);
-          const today = new Date();
-          return today >= start && today <= end;
-        }) || semestersData[0];
-        if (currentSemester) {
-          setSelectedSemester(currentSemester.id);
-        }
+      // Get semesters for student's year
+      const response = await axios.get(`/student/schedule/semesters`);
+      const semestersData = response.data.data || [];
+      setSemesters(semestersData);
+      // Auto-select current semester
+      const currentSemester = semestersData.find(s => {
+        const start = new Date(s.start_date);
+        const end = new Date(s.end_date);
+        const today = new Date();
+        return today >= start && today <= end;
+      }) || semestersData[0];
+      if (currentSemester) {
+        setSelectedSemester(currentSemester.id);
       }
     } catch (error) {
       console.error('Error fetching semesters:', error);
+      setSemesters([]);
     }
   };
 
