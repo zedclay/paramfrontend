@@ -12,15 +12,28 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    // Try to restore user from localStorage on initial load
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      try {
+        return JSON.parse(savedUser);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  });
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(() => localStorage.getItem('token'));
 
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       fetchUser();
     } else {
+      // If no token, clear user and stop loading
+      setUser(null);
       setLoading(false);
     }
   }, [token]);
@@ -28,11 +41,28 @@ export const AuthProvider = ({ children }) => {
   const fetchUser = async () => {
     try {
       const response = await axios.get('/auth/me');
-      setUser(response.data.data);
+      const userData = response.data.data;
+      setUser(userData);
+      // Save user to localStorage for persistence
+      localStorage.setItem('user', JSON.stringify(userData));
     } catch (error) {
-      localStorage.removeItem('token');
-      setToken(null);
-      delete axios.defaults.headers.common['Authorization'];
+      // Only remove token if it's an authentication error (401/403)
+      // Don't remove token for network errors or other issues
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        // Token is invalid or expired - clear everything
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setToken(null);
+        setUser(null);
+        delete axios.defaults.headers.common['Authorization'];
+      } else {
+        // For network errors or other issues, keep the token and user from localStorage
+        // User will remain logged in with cached data
+        // The token is still valid, just couldn't fetch fresh data
+        console.warn('Could not fetch fresh user data, using cached data:', error.message);
+        // User is already set from localStorage in useState initializer
+        // If it's not set, keep it as null but don't remove token
+      }
     } finally {
       setLoading(false);
     }

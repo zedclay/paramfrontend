@@ -10,9 +10,14 @@ const StudentSchedule = () => {
   const { user, isStudent } = useAuth();
   const navigate = useNavigate();
   const [schedule, setSchedule] = useState(null);
+  const [specialities, setSpecialities] = useState([]);
+  const [years, setYears] = useState([]);
   const [semesters, setSemesters] = useState([]);
+  const [selectedSpeciality, setSelectedSpeciality] = useState(null);
+  const [selectedYear, setSelectedYear] = useState(null);
   const [selectedSemester, setSelectedSemester] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingData, setLoadingData] = useState(false);
   const [viewMode, setViewMode] = useState('week'); // 'week' or 'day'
 
   useEffect(() => {
@@ -20,69 +25,101 @@ const StudentSchedule = () => {
       navigate('/login');
       return;
     }
-    
-    // Wait for user data to be loaded before fetching schedule
-    if (user) {
-      // Fetch schedule first (without semester_id to get current semester and available semesters)
-      fetchSchedule(null);
-    }
-  }, [isStudent, navigate, user]);
+    fetchSpecialities();
+  }, [isStudent, navigate]);
 
-  useEffect(() => {
-    if (selectedSemester) {
-      fetchSchedule(selectedSemester);
-    }
-  }, [selectedSemester]);
-
-  const fetchSchedule = async (semesterId) => {
-    setLoading(true);
+  // Fetch specialties on mount
+  const fetchSpecialities = async () => {
     try {
-      const params = semesterId ? { semester_id: semesterId } : {};
-      const response = await axios.get(`/student/schedule`, { params });
-      
-      const scheduleData = response.data.data;
-      setSchedule(scheduleData);
-      
-      // Update available semesters from response
-      if (scheduleData.available_semesters && Array.isArray(scheduleData.available_semesters)) {
-        setSemesters(scheduleData.available_semesters);
-        
-        // Auto-select current semester if not already selected
-        if (!selectedSemester && scheduleData.semester) {
-          setSelectedSemester(scheduleData.semester.id);
-        } else if (!selectedSemester && scheduleData.available_semesters.length > 0) {
-          // Select first available semester if no current semester
-          setSelectedSemester(scheduleData.available_semesters[0].id);
-        }
-      }
+      const response = await axios.get('/student/schedule/specialities');
+      setSpecialities(response.data.data || []);
     } catch (error) {
-      console.error('Error fetching schedule:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('User data:', user);
-      
-      const errorMessage = error.response?.data?.error?.message || error.message;
-      const errorCode = error.response?.data?.error?.code;
-      
-      // Handle missing year/group assignment
-      if (error.response?.status === 400 && (errorCode === 'MISSING_INFO' || errorMessage?.includes('year and group'))) {
-        setSchedule({
-          error: 'MISSING_INFO',
-          message: 'Vous devez être assigné à une année et un groupe pour voir votre emploi du temps. Veuillez contacter l\'administrateur.'
-        });
-        setSemesters([]);
-      } else if (error.response?.status === 401 || error.response?.status === 403) {
-        setSchedule({
-          error: 'AUTH_ERROR',
-          message: 'Vous devez être connecté pour voir votre emploi du temps.'
-        });
-      } else {
-        setSchedule({
-          error: 'FETCH_ERROR',
-          message: `Erreur lors du chargement de l'emploi du temps: ${errorMessage}`
-        });
-      }
+      console.error('Error fetching specialities:', error);
+      setSpecialities([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch years when specialty is selected
+  useEffect(() => {
+    if (selectedSpeciality) {
+      fetchYears(selectedSpeciality);
+      // Reset year and semester when specialty changes
+      setSelectedYear(null);
+      setSelectedSemester(null);
+      setYears([]);
+      setSemesters([]);
+      setSchedule(null);
+    }
+  }, [selectedSpeciality]);
+
+  const fetchYears = async (specialityId) => {
+    try {
+      setLoadingData(true);
+      const response = await axios.get(`/student/schedule/specialities/${specialityId}/years`);
+      setYears(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching years:', error);
+      setYears([]);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  // Fetch semesters when year is selected
+  useEffect(() => {
+    if (selectedYear) {
+      fetchSemesters(selectedYear);
+      // Reset semester when year changes
+      setSelectedSemester(null);
+      setSemesters([]);
+      setSchedule(null);
+    }
+  }, [selectedYear]);
+
+  const fetchSemesters = async (yearId) => {
+    try {
+      setLoadingData(true);
+      const response = await axios.get(`/student/schedule/years/${yearId}/semesters`);
+      setSemesters(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching semesters:', error);
+      setSemesters([]);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  // Fetch schedule when semester is selected
+  useEffect(() => {
+    if (selectedSemester && selectedYear && selectedSpeciality) {
+      fetchSchedule();
+    }
+  }, [selectedSemester, selectedYear, selectedSpeciality]);
+
+  const fetchSchedule = async () => {
+    if (!selectedSpeciality || !selectedYear || !selectedSemester) {
+      return;
+    }
+
+    setLoadingData(true);
+    try {
+      const params = {
+        speciality_id: selectedSpeciality,
+        year_id: selectedYear,
+        semester_id: selectedSemester,
+      };
+      const response = await axios.get(`/student/schedule`, { params });
+      setSchedule(response.data.data);
+    } catch (error) {
+      console.error('Error fetching schedule:', error);
+      setSchedule({
+        error: 'FETCH_ERROR',
+        message: `Erreur lors du chargement de l'emploi du temps: ${error.response?.data?.error?.message || error.message}`
+      });
+    } finally {
+      setLoadingData(false);
     }
   };
 
@@ -144,46 +181,12 @@ const StudentSchedule = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h1 className="text-3xl font-bold text-text-dark">Mon Emploi du Temps</h1>
-              <p className="text-gray-600 mt-1">
-                {user?.year?.name?.fr 
-                  ? user.year.name.fr 
-                  : user?.year?.year_number 
-                    ? `Année ${user.year.year_number}` 
-                    : user?.year_id 
-                      ? `Année ID: ${user.year_id}` 
-                      : 'Non assigné'} - 
-                {user?.group?.name 
-                  ? `Groupe ${user.group.name}` 
-                  : user?.group?.code 
-                    ? `Groupe ${user.group.code}` 
-                    : user?.group_id 
-                      ? `Groupe ID: ${user.group_id}` 
-                      : 'Non assigné'}
-              </p>
+              <p className="text-gray-600 mt-1">Sélectionnez une spécialité, une année et un semestre</p>
             </div>
-            <div className="flex gap-4">
-              <select
-                value={selectedSemester || ''}
-                onChange={(e) => setSelectedSemester(parseInt(e.target.value))}
-                className="border border-gray-300 rounded-lg px-4 py-2"
-                disabled={!user?.year_id || !user?.group_id || semesters.length === 0}
-              >
-                <option value="">
-                  {!user?.year_id || !user?.group_id 
-                    ? 'Assignez année/groupe d\'abord' 
-                    : semesters.length === 0 
-                      ? 'Aucun semestre disponible'
-                      : 'Sélectionner un semestre'}
-                </option>
-                {semesters.map(semester => (
-                  <option key={semester.id} value={semester.id}>
-                    {semester.name?.fr || `Semestre ${semester.semester_number}`} - {semester.academic_year}
-                  </option>
-                ))}
-              </select>
+            <div className="flex gap-2">
               <div className="flex border border-gray-300 rounded-lg overflow-hidden">
                 <button
                   onClick={() => setViewMode('week')}
@@ -204,11 +207,91 @@ const StudentSchedule = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Selection Dropdowns */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Spécialité
+              </label>
+              <select
+                value={selectedSpeciality || ''}
+                onChange={(e) => setSelectedSpeciality(e.target.value ? parseInt(e.target.value) : null)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
+                disabled={loading}
+              >
+                <option value="">Sélectionner une spécialité</option>
+                {specialities.map(speciality => (
+                  <option key={speciality.id} value={speciality.id}>
+                    {speciality.name?.fr || speciality.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Année
+              </label>
+              <select
+                value={selectedYear || ''}
+                onChange={(e) => setSelectedYear(e.target.value ? parseInt(e.target.value) : null)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
+                disabled={!selectedSpeciality || loadingData}
+              >
+                <option value="">
+                  {!selectedSpeciality 
+                    ? 'Sélectionnez d\'abord une spécialité' 
+                    : loadingData 
+                      ? 'Chargement...'
+                      : 'Sélectionner une année'}
+                </option>
+                {years.map(year => (
+                  <option key={year.id} value={year.id}>
+                    {year.name?.fr || `Année ${year.year_number}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Semestre
+              </label>
+              <select
+                value={selectedSemester || ''}
+                onChange={(e) => setSelectedSemester(e.target.value ? parseInt(e.target.value) : null)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
+                disabled={!selectedYear || loadingData}
+              >
+                <option value="">
+                  {!selectedYear 
+                    ? 'Sélectionnez d\'abord une année' 
+                    : loadingData 
+                      ? 'Chargement...'
+                      : 'Sélectionner un semestre'}
+                </option>
+                {semesters.map(semester => (
+                  <option key={semester.id} value={semester.id}>
+                    {semester.name?.fr || `Semestre ${semester.semester_number}`} - {semester.academic_year}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Schedule Display */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6, 7].map((i) => (
               <CardSkeleton key={i} />
             ))}
+          </div>
+        ) : loadingData ? (
+          <div className="bg-white rounded-lg shadow-md p-12 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-gray-600">Chargement...</p>
           </div>
         ) : schedule && schedule.planning?.image_path ? (
           // Display image if available
@@ -295,7 +378,7 @@ const StudentSchedule = () => {
                 ))}
               </div>
             ) : (
-              // Day View - Show selected day or today
+              // Day View
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-2xl font-bold mb-6 text-text-dark">
                   {getDayName(Object.keys(groupedSchedule)[0] || 1)}
@@ -355,44 +438,26 @@ const StudentSchedule = () => {
           </div>
         ) : schedule?.error ? (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <FaCalendarAlt className={`text-5xl mx-auto mb-4 ${
-              schedule.error === 'MISSING_INFO' ? 'text-red-400' : 
-              schedule.error === 'AUTH_ERROR' ? 'text-yellow-400' : 
-              'text-gray-400'
-            }`} />
-            <p className={`text-lg font-semibold mb-2 ${
-              schedule.error === 'MISSING_INFO' ? 'text-red-500' : 
-              schedule.error === 'AUTH_ERROR' ? 'text-yellow-600' : 
-              'text-gray-600'
-            }`}>
-              {schedule.error === 'MISSING_INFO' ? 'Information manquante' :
-               schedule.error === 'AUTH_ERROR' ? 'Erreur d\'authentification' :
-               'Erreur'}
-            </p>
-            <p className="text-gray-600 text-sm mb-4">
+            <FaCalendarAlt className="text-5xl text-red-400 mx-auto mb-4" />
+            <p className="text-lg font-semibold text-red-500 mb-2">Erreur</p>
+            <p className="text-gray-600 text-sm">
               {schedule.message || 'Une erreur est survenue lors du chargement de l\'emploi du temps.'}
             </p>
-            {schedule.error === 'MISSING_INFO' && (
-              <>
-                <p className="text-gray-500 text-xs mb-2">
-                  Votre compte n'est pas correctement configuré. Informations manquantes:
-                </p>
-                <div className="text-left inline-block bg-gray-50 p-4 rounded text-xs text-gray-600">
-                  <p>• Année ID: {user?.year_id || '❌ Non assigné'}</p>
-                  <p>• Groupe ID: {user?.group_id || '❌ Non assigné'}</p>
-                </div>
-                <p className="text-gray-400 text-xs mt-4">
-                  Contactez l'administrateur pour résoudre ce problème.
-                </p>
-              </>
-            )}
+          </div>
+        ) : !selectedSemester ? (
+          <div className="bg-white rounded-lg shadow-md p-12 text-center">
+            <FaCalendarAlt className="text-5xl text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500 text-lg">Sélectionnez une spécialité, une année et un semestre</p>
+            <p className="text-gray-400 text-sm mt-2">
+              Utilisez les menus déroulants ci-dessus pour voir l'emploi du temps
+            </p>
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <FaCalendarAlt className="text-5xl text-gray-400 mx-auto mb-4" />
             <p className="text-gray-500 text-lg">Aucun emploi du temps disponible</p>
             <p className="text-gray-400 text-sm mt-2">
-              {selectedSemester ? 'Aucun cours programmé pour ce semestre' : 'Chargement...'}
+              Aucun cours programmé pour ce semestre
             </p>
           </div>
         )}
@@ -402,4 +467,3 @@ const StudentSchedule = () => {
 };
 
 export default StudentSchedule;
-
