@@ -108,30 +108,38 @@ const PlanningManagement = () => {
     }
   };
 
+  const [scheduleImage, setScheduleImage] = useState(null);
+
   const fetchPlanning = async (semesterId) => {
     setLoading(true);
     try {
-      const response = await axios.get(`/admin/plannings`, {
+      // Fetch planning (for detailed items)
+      const planningResponse = await axios.get(`/admin/plannings`, {
         params: { semester_id: semesterId }
       });
-      const planning = response.data.data?.[0] || null;
+      const planning = planningResponse.data.data?.[0] || null;
       console.log('Fetched planning:', planning);
-      console.log('Planning image_path:', planning?.image_path);
-      console.log('Planning is_published:', planning?.is_published);
+      
+      // Fetch schedule image (NEW ARCHITECTURE)
+      try {
+        const imageResponse = await axios.get(`/admin/schedule-images/${semesterId}`);
+        const imageData = imageResponse.data.data;
+        console.log('Fetched schedule image:', imageData);
+        setScheduleImage(imageData);
+      } catch (imageError) {
+        // If no image exists, that's OK
+        if (imageError.response?.status !== 404) {
+          console.error('Error fetching schedule image:', imageError);
+        }
+        setScheduleImage(null);
+      }
       
       setSelectedPlanning(planning);
       if (planning) {
         fetchPlanningItems(planning.id);
-        // Reset image preview when planning changes
-        setImagePreview(null);
-        
-        // Debug: Log if image_path is missing
-        if (!planning.image_path) {
-          console.warn('⚠️ Planning exists but image_path is NULL or empty');
-          console.warn('Planning ID:', planning.id);
-          console.warn('Planning data:', planning);
-        }
       }
+      // Reset image preview when planning changes
+      setImagePreview(null);
     } catch (error) {
       console.error('Error fetching planning:', error);
       console.error('Error response:', error.response?.data);
@@ -197,15 +205,9 @@ const PlanningManagement = () => {
     }
   };
 
-  const handleCreatePlanning = async (withImage = false) => {
+  const handleCreatePlanning = async () => {
     if (!selectedSemester) {
       alert('Veuillez sélectionner un semestre');
-      return;
-    }
-    
-    // If creating with image but no image selected, show alert
-    if (withImage && !imageFile) {
-      alert('Veuillez sélectionner une image avant de créer l\'emploi du temps');
       return;
     }
 
@@ -214,36 +216,15 @@ const PlanningManagement = () => {
       const formDataToSend = new FormData();
       formDataToSend.append('semester_id', selectedSemester);
       formDataToSend.append('academic_year', semester?.academic_year || '2024-2025');
-      
-      // Add image if creating with image
-      if (withImage && imageFile) {
-        formDataToSend.append('image', imageFile);
-        console.log('Creating planning with image:', imageFile.name, imageFile.size);
-      }
 
-      const response = await axios.post('/admin/plannings', formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await axios.post('/admin/plannings', formDataToSend);
       
       console.log('Planning created:', response.data);
-      
-      // Reset image upload state
-      if (withImage) {
-        setImageFile(null);
-        setImagePreview(null);
-        setShowImageUpload(false);
-      }
       
       // Fetch the newly created planning
       await fetchPlanning(selectedSemester);
       
-      if (withImage) {
-        alert('✅ Emploi du temps créé avec l\'image avec succès!');
-      } else {
-        alert('✅ Emploi du temps créé avec succès! Vous pouvez maintenant uploader une image.');
-      }
+      alert('✅ Emploi du temps créé avec succès! Vous pouvez maintenant uploader une image.');
     } catch (error) {
       console.error('Error creating planning:', error);
       console.error('Error response:', error.response?.data);
@@ -265,118 +246,61 @@ const PlanningManagement = () => {
   };
 
   const handleUploadImage = async () => {
-    if (!selectedPlanning || !imageFile) return;
+    if (!selectedSemester || !imageFile) return;
     
     try {
       const formDataToSend = new FormData();
       formDataToSend.append('image', imageFile);
+      formDataToSend.append('semester_id', selectedSemester);
 
-      console.log('Uploading image for planning:', selectedPlanning.id);
+      console.log('Uploading schedule image for semester:', selectedSemester);
       console.log('Image file:', imageFile.name, imageFile.size);
 
-      const response = await axios.put(`/admin/plannings/${selectedPlanning.id}`, formDataToSend, {
+      const response = await axios.post(`/admin/schedule-images/${selectedSemester}`, formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
       
-      console.log('=== UPLOAD RESPONSE DEBUG ===');
+      console.log('=== UPLOAD RESPONSE ===');
       console.log('Response status:', response.status);
       console.log('Response success:', response.data?.success);
-      console.log('Full response object:', response);
-      console.log('response.data:', response.data);
-      console.log('response.data.data:', response.data?.data);
-      console.log('response.data.data?.image_path:', response.data?.data?.image_path);
-      console.log('response.data.data?.image_path type:', typeof response.data?.data?.image_path);
-      console.log('response.data.data?.image_path value:', response.data?.data?.image_path);
-      console.log('response.data.data?.image_path === null:', response.data?.data?.image_path === null);
-      console.log('response.data.data?.image_path === "":', response.data?.data?.image_path === '');
+      console.log('Response data:', response.data?.data);
       
-      // Log the entire response structure for debugging
-      console.log('Full response JSON:', JSON.stringify(response.data, null, 2));
-      
-      // Also log the raw response if available
-      if (response.request?.response) {
-        console.log('Raw response text:', response.request.response);
-      }
-      
-      // Check multiple possible response structures - be more thorough
-      let imagePath = null;
-      
-      // Try response.data.data.image_path first (standard structure)
-      if (response.data?.data?.image_path) {
-        imagePath = response.data.data.image_path;
-        console.log('Found image_path in response.data.data.image_path');
-      }
-      // Try response.data.image_path (alternative structure)
-      else if (response.data?.image_path) {
-        imagePath = response.data.image_path;
-        console.log('Found image_path in response.data.image_path');
-      }
-      // Try nested object access
-      else if (response.data?.data && typeof response.data.data === 'object') {
-        imagePath = response.data.data.image_path;
-        console.log('Tried nested object access');
-      }
-      
-      console.log('Extracted image_path:', imagePath);
-      console.log('image_path type:', typeof imagePath);
-      console.log('image_path truthy check:', !!imagePath);
-      console.log('image_path empty check:', imagePath === '' || imagePath === null || imagePath === undefined);
-      
-      // Verify image_path was saved
-      if (imagePath && imagePath !== null && imagePath !== '' && imagePath !== undefined) {
-        console.log('✅ Image path saved:', imagePath);
+      if (response.data?.success && response.data?.data?.image_path) {
+        console.log('✅ Schedule image uploaded successfully:', response.data.data.image_path);
         setImageFile(null);
         setImagePreview(null);
         setShowImageUpload(false);
-        // Refresh planning to show the image
+        // Refresh to show the new image
         await fetchPlanning(selectedSemester);
         alert('✅ Image uploadée avec succès!');
-        return; // Exit early on success
-      }
-      
-      // If we get here, image_path was not in response
-      console.error('❌ Image path not in response. Full response structure:');
-      console.error('Full response.data:', JSON.stringify(response.data, null, 2));
-      console.error('response.data.data type:', typeof response.data?.data);
-      console.error('response.data.data value:', response.data?.data);
-      console.error('All keys in response.data:', response.data ? Object.keys(response.data) : 'no data');
-      console.error('All keys in response.data.data:', response.data?.data ? Object.keys(response.data.data) : 'no data.data');
-      
-      // Try to refresh anyway - maybe the image was saved but not in response
-      console.log('Refreshing planning to check if image_path is available...');
-      await fetchPlanning(selectedSemester);
-      
-      // Wait a moment for state to update, then check
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Re-fetch planning to get fresh data
-      const refreshResponse = await axios.get(`/admin/plannings`, {
-        params: { semester_id: selectedSemester }
-      });
-      const refreshedPlanning = refreshResponse.data.data?.[0] || null;
-      
-      console.log('Refreshed planning from API:', refreshedPlanning);
-      console.log('Refreshed planning image_path:', refreshedPlanning?.image_path);
-      
-      if (refreshedPlanning?.image_path) {
-        console.log('✅ Image path found after refresh:', refreshedPlanning.image_path);
-        setSelectedPlanning(refreshedPlanning);
-        setImageFile(null);
-        setImagePreview(null);
-        setShowImageUpload(false);
-        alert('✅ Image uploadée avec succès! (récupérée après rafraîchissement)');
       } else {
-        // Last resort: check if the upload actually succeeded by checking the file exists
-        console.error('❌ Image path still not found after refresh');
-        console.error('Full refresh response:', JSON.stringify(refreshResponse.data, null, 2));
-        alert('⚠️ Upload réussi mais image_path non sauvegardé. Vérifiez les logs serveur et la console.\n\nVérifiez aussi si l\'image apparaît après un rafraîchissement de la page.');
+        console.error('❌ Unexpected response structure:', response.data);
+        alert('⚠️ Réponse inattendue du serveur. Vérifiez la console.');
       }
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('Error uploading schedule image:', error);
       console.error('Error response:', error.response?.data);
       const errorMsg = error.response?.data?.error?.message || error.response?.data?.message || 'Erreur lors de l\'upload';
+      alert(`Erreur: ${errorMsg}`);
+    }
+  };
+
+  const handleDeleteImage = async () => {
+    if (!selectedSemester || !scheduleImage) return;
+    
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette image?')) {
+      return;
+    }
+    
+    try {
+      await axios.delete(`/admin/schedule-images/${selectedSemester}`);
+      setScheduleImage(null);
+      alert('✅ Image supprimée avec succès!');
+    } catch (error) {
+      console.error('Error deleting schedule image:', error);
+      const errorMsg = error.response?.data?.error?.message || error.response?.data?.message || 'Erreur lors de la suppression';
       alert(`Erreur: ${errorMsg}`);
     }
   };
@@ -726,9 +650,9 @@ const PlanningManagement = () => {
                     onClick={() => setShowImageUpload(!showImageUpload)}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center hover:bg-blue-700 transition"
                   >
-                    <FaPlus className="mr-2" /> {selectedPlanning.image_path ? 'Remplacer l\'image' : 'Ajouter une image'}
+                    <FaPlus className="mr-2" /> {scheduleImage ? 'Remplacer l\'image' : 'Ajouter une image'}
                   </button>
-                  {selectedPlanning.image_path && (
+                  {scheduleImage && (
                     <button 
                       onClick={handleDeleteImage}
                       className="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center hover:bg-red-700 transition"
@@ -742,7 +666,7 @@ const PlanningManagement = () => {
           </div>
 
           {/* Image Upload Form */}
-          {showImageUpload && selectedPlanning && (
+          {showImageUpload && selectedSemester && (
             <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
               <h4 className="font-bold mb-4">Uploader une image (PNG/JPG)</h4>
               <div className="space-y-4">
@@ -788,10 +712,10 @@ const PlanningManagement = () => {
             </div>
           )}
 
-          {/* Display Planning Image - Main Content */}
-          {!showImageUpload && selectedPlanning && (
+          {/* Display Schedule Image - Main Content */}
+          {!showImageUpload && selectedSemester && (
             <div className="bg-white rounded-lg shadow-md p-6">
-              {selectedPlanning.image_path ? (
+              {scheduleImage ? (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <h4 className="font-bold text-xl text-gray-800">Emploi du temps</h4>
@@ -801,10 +725,11 @@ const PlanningManagement = () => {
                   </div>
                   <div className="flex justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-lg border-2 border-gray-200">
                     {(() => {
-                      const imageUrl = selectedPlanning.image_path.startsWith('http') 
-                        ? selectedPlanning.image_path 
-                        : `${window.location.protocol}//${window.location.host}/storage/${selectedPlanning.image_path}`;
-                      console.log('Displaying image:', imageUrl);
+                      const imageUrl = scheduleImage.image_url || 
+                        (scheduleImage.image_path?.startsWith('http') 
+                          ? scheduleImage.image_path 
+                          : `${window.location.protocol}//${window.location.host}/storage/${scheduleImage.image_path}`);
+                      console.log('Displaying schedule image:', imageUrl);
                       return (
                         <img 
                           src={imageUrl}
@@ -813,7 +738,7 @@ const PlanningManagement = () => {
                           style={{ maxHeight: '80vh' }}
                           onError={(e) => {
                             console.error('Image load error:', e);
-                            console.error('Image path:', selectedPlanning.image_path);
+                            console.error('Image path:', scheduleImage.image_path);
                             console.error('Constructed URL:', imageUrl);
                           }}
                         />
