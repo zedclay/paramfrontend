@@ -23,7 +23,9 @@ import {
   FaArrowRight,
   FaBullhorn,
   FaCalendarAlt,
-  FaUserMd
+  FaUserMd,
+  FaQuoteLeft,
+  FaSignature
 } from 'react-icons/fa';
 import AnimatedCard from '../components/AnimatedCard';
 import { CardSkeleton } from '../components/LoadingSkeleton';
