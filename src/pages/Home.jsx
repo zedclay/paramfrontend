@@ -30,10 +30,12 @@ import { CardSkeleton } from '../components/LoadingSkeleton';
 import { IMAGE_PATHS, getFiliereImage } from '../constants';
 
 const Home = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [filieres, setFilieres] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
+  const [heroSlides, setHeroSlides] = useState([]);
   const [loading, setLoading] = useState(true);
+  const locale = i18n.language || 'fr';
 
   useEffect(() => {
     fetchData();
@@ -41,42 +43,76 @@ const Home = () => {
 
   const fetchData = async () => {
     try {
-      const [filieresRes, announcementsRes] = await Promise.all([
+      const [filieresRes, announcementsRes, slidesRes] = await Promise.all([
         axios.get('/public/filieres'),
         axios.get('/public/announcements'),
+        axios.get('/public/hero-slides').catch(() => ({ data: { data: [] } })), // Fallback if API not ready
       ]);
       setFilieres(filieresRes.data.data);
       setAnnouncements(announcementsRes.data.data);
+      
+      // Transform slides from API to component format
+      const slides = (slidesRes.data.data || []).map(slide => {
+        const IconMap = {
+          stethoscope: FaStethoscope,
+          heartbeat: FaHeartbeat,
+          hospital: FaHospital,
+        };
+        
+        return {
+          id: slide.id,
+          title: slide.title?.[locale] || slide.title?.fr || slide.title || '',
+          subtitle: slide.subtitle?.[locale] || slide.subtitle?.fr || slide.subtitle || '',
+          icon: FaStethoscope, // Default icon, can be extended
+          gradient: slide.gradient || 'from-blue-600 to-cyan-500',
+          image: slide.image_url || slide.image_path ? (slide.image_url || `/storage/${slide.image_path}`) : '/images/hero/hero-1.jpg',
+        };
+      });
+
+      // If no slides from API, use default slides
+      if (slides.length === 0) {
+        setHeroSlides([
+          {
+            title: t('home.hero.slide1.title'),
+            subtitle: t('home.hero.slide1.subtitle'),
+            icon: FaStethoscope,
+            gradient: 'from-blue-600 to-cyan-500',
+            image: '/images/hero/hero-1.jpg',
+          },
+          {
+            title: t('home.hero.slide2.title'),
+            subtitle: t('home.hero.slide2.subtitle'),
+            icon: FaHeartbeat,
+            gradient: 'from-emerald-600 to-teal-500',
+            image: '/images/hero/hero-2.jpg',
+          },
+          {
+            title: t('home.hero.slide3.title'),
+            subtitle: t('home.hero.slide3.subtitle'),
+            icon: FaHospital,
+            gradient: 'from-purple-600 to-pink-500',
+            image: '/images/hero/hero-3.jpg',
+          },
+        ]);
+      } else {
+        setHeroSlides(slides);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
+      // Fallback to default slides on error
+      setHeroSlides([
+        {
+          title: t('home.hero.slide1.title'),
+          subtitle: t('home.hero.slide1.subtitle'),
+          icon: FaStethoscope,
+          gradient: 'from-blue-600 to-cyan-500',
+          image: '/images/hero/hero-1.jpg',
+        },
+      ]);
     } finally {
       setLoading(false);
     }
   };
-
-  const heroSlides = [
-    {
-      title: t('home.hero.slide1.title'),
-      subtitle: t('home.hero.slide1.subtitle'),
-      icon: FaStethoscope,
-      gradient: 'from-blue-600 to-cyan-500',
-      image: '/images/hero/hero-1.jpg',
-    },
-    {
-      title: t('home.hero.slide2.title'),
-      subtitle: t('home.hero.slide2.subtitle'),
-      icon: FaHeartbeat,
-      gradient: 'from-emerald-600 to-teal-500',
-      image: '/images/hero/hero-2.jpg',
-    },
-    {
-      title: t('home.hero.slide3.title'),
-      subtitle: t('home.hero.slide3.subtitle'),
-      icon: FaHospital,
-      gradient: 'from-purple-600 to-pink-500',
-      image: '/images/hero/hero-3.jpg',
-    },
-  ];
 
   if (loading) {
     return (

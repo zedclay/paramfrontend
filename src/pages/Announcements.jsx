@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { FaBullhorn, FaCalendarAlt, FaUser } from 'react-icons/fa';
+import { FaBullhorn, FaCalendarAlt, FaUser, FaImage, FaFilePdf } from 'react-icons/fa';
 import { CardSkeleton } from '../components/LoadingSkeleton';
 import AnimatedCard from '../components/AnimatedCard';
 
@@ -61,58 +62,80 @@ const Announcements = () => {
       {announcements.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {announcements.map((announcement, index) => (
-            <AnimatedCard key={announcement.id} delay={index * 0.1}>
-              <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 h-full flex flex-col">
-                {/* Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center">
-                    <div className="bg-primary/10 p-2 rounded-lg mr-3">
-                      <FaBullhorn className="text-primary text-xl" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-text-dark line-clamp-2">
-                        {announcement.title?.fr || announcement.title}
-                      </h3>
+            <Link key={announcement.id} to={`/announcements/${announcement.id}`}>
+              <AnimatedCard delay={index * 0.1}>
+                <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 h-full flex flex-col cursor-pointer">
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center flex-1">
+                      <div className="bg-primary/10 p-2 rounded-lg mr-3">
+                        <FaBullhorn className="text-primary text-xl" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-text-dark line-clamp-2">
+                          {announcement.title?.fr || announcement.title}
+                        </h3>
+                        {/* Show image thumbnail if exists */}
+                        {announcement.image_path && (
+                          <div className="mt-2 w-full h-32 overflow-hidden rounded">
+                            <img
+                              src={announcement.image_url || `/storage/${announcement.image_path}`}
+                              alt={announcement.title?.fr || announcement.title}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Content */}
-                <div className="flex-1 mb-4">
-                  <p className="text-gray-600 line-clamp-4">
-                    {announcement.content?.fr || announcement.content}
-                  </p>
-                </div>
+                  {/* Content */}
+                  <div className="flex-1 mb-4">
+                    <p className="text-gray-600 line-clamp-4">
+                      {announcement.content?.fr || announcement.content}
+                    </p>
+                  </div>
 
-                {/* Footer */}
-                <div className="border-t pt-4 mt-auto">
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <FaCalendarAlt className="mr-2" />
-                      <span>
-                        {announcement.published_at
-                          ? new Date(announcement.published_at).toLocaleDateString('fr-FR', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                            })
-                          : new Date(announcement.created_at).toLocaleDateString('fr-FR', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                            })}
-                      </span>
-                    </div>
-                    {announcement.author && (
+                  {/* Footer */}
+                  <div className="border-t pt-4 mt-auto">
+                    <div className="flex items-center justify-between text-sm text-gray-500">
                       <div className="flex items-center">
-                        <FaUser className="mr-1" />
-                        <span className="text-xs">{announcement.author.name}</span>
+                        <FaCalendarAlt className="mr-2" />
+                        <span>
+                          {announcement.published_at
+                            ? new Date(announcement.published_at).toLocaleDateString('fr-FR', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })
+                            : new Date(announcement.created_at).toLocaleDateString('fr-FR', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                        </span>
+                      </div>
+                      {announcement.author && (
+                        <div className="flex items-center">
+                          <FaUser className="mr-1" />
+                          <span className="text-xs">{announcement.author.name}</span>
+                        </div>
+                      )}
+                    </div>
+                    {/* Show file indicators */}
+                    {(announcement.image_path || announcement.pdf_path) && (
+                      <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                        {announcement.image_path && <FaImage />}
+                        {announcement.pdf_path && <FaFilePdf />}
                       </div>
                     )}
                   </div>
                 </div>
-              </div>
-            </AnimatedCard>
+              </AnimatedCard>
+            </Link>
           ))}
         </div>
       ) : (

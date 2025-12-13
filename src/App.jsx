@@ -8,6 +8,7 @@ import Filieres from './pages/Filieres';
 import Specialites from './pages/Specialites';
 import Modules from './pages/Modules';
 import Announcements from './pages/Announcements';
+import AnnouncementDetail from './pages/AnnouncementDetail';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
 import StudentDashboard from './pages/StudentDashboard';
@@ -105,6 +106,7 @@ function App() {
           <Route path="/specialites" element={<Layout locale={locale} changeLocale={changeLocale}><Specialites /></Layout>} />
           <Route path="/modules" element={<Layout locale={locale} changeLocale={changeLocale}><Modules /></Layout>} />
           <Route path="/announcements" element={<Layout locale={locale} changeLocale={changeLocale}><Announcements /></Layout>} />
+          <Route path="/announcements/:id" element={<Layout locale={locale} changeLocale={changeLocale}><AnnouncementDetail /></Layout>} />
           <Route path="/contact" element={<Layout locale={locale} changeLocale={changeLocale}><Contact /></Layout>} />
           
           {/* Auth routes */}
