@@ -31,14 +31,33 @@ const HeroCarouselManagement = () => {
   const fetchSlides = async () => {
     try {
       setLoading(true);
+      setMessage({ type: '', text: '' }); // Clear previous messages
       const response = await axios.get('/admin/hero-slides');
-      setSlides(response.data.data || []);
+      const slidesData = response.data.data || [];
+      setSlides(slidesData);
+      
+      if (slidesData.length === 0) {
+        setMessage({ 
+          type: 'info', 
+          text: 'Aucun slide n\'a été créé pour le moment. Cliquez sur "Nouveau Slide" pour créer votre premier slide de carousel.' 
+        });
+      }
     } catch (error) {
       console.error('Error fetching hero slides:', error);
-      setMessage({ 
-        type: 'error', 
-        text: 'Erreur lors du chargement des slides: ' + (error.response?.data?.error?.message || 'Erreur inconnue') 
-      });
+      const errorMessage = error.response?.data?.error?.message || error.response?.data?.message || error.message;
+      
+      if (error.response?.status === 404 || error.response?.status === 500) {
+        setMessage({ 
+          type: 'error', 
+          text: 'Erreur: La table hero_slides n\'existe peut-être pas. Veuillez exécuter la migration: php artisan migrate' 
+        });
+      } else {
+        setMessage({ 
+          type: 'error', 
+          text: 'Erreur lors du chargement des slides: ' + errorMessage 
+        });
+      }
+      setSlides([]);
     } finally {
       setLoading(false);
     }
@@ -214,7 +233,9 @@ const HeroCarouselManagement = () => {
               ? 'bg-green-100 text-green-800 border border-green-300' 
               : message.type === 'error'
               ? 'bg-red-100 text-red-800 border border-red-300'
-              : 'bg-blue-100 text-blue-800 border border-blue-300'
+              : message.type === 'info'
+              ? 'bg-blue-100 text-blue-800 border border-blue-300'
+              : 'bg-gray-100 text-gray-800 border border-gray-300'
           }`}
         >
           {message.text}
