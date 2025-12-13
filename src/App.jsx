@@ -15,6 +15,7 @@ import StudentSchedule from './pages/StudentSchedule';
 import AdminDashboard from './pages/AdminDashboard';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
+import PageTitle from './components/PageTitle';
 import { AuthProvider } from './contexts/AuthContext';
 
 // Configure axios base URL
@@ -94,6 +95,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <PageTitle />
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Layout locale={locale} changeLocale={changeLocale}><Home /></Layout>} />
