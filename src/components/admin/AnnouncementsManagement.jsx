@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaPlus, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaTimes, FaFilePdf, FaImage, FaDownload } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
 const AnnouncementsManagement = () => {
@@ -17,6 +17,10 @@ const AnnouncementsManagement = () => {
     content_ar: '',
     is_published: false,
     target_audience: 'all',
+    image: null,
+    pdf: null,
+    remove_image: false,
+    remove_pdf: false,
   });
 
   useEffect(() => {
@@ -51,6 +55,10 @@ const AnnouncementsManagement = () => {
       content_ar: announcement.content?.ar || '',
       is_published: announcement.is_published || false,
       target_audience: announcement.target_audience || 'all',
+      image: null,
+      pdf: null,
+      remove_image: false,
+      remove_pdf: false,
     });
     setShowModal(true);
   };
@@ -65,6 +73,10 @@ const AnnouncementsManagement = () => {
       content_ar: '',
       is_published: false,
       target_audience: 'all',
+      image: null,
+      pdf: null,
+      remove_image: false,
+      remove_pdf: false,
     });
     setMessage({ type: '', text: '' });
   };
@@ -74,19 +86,43 @@ const AnnouncementsManagement = () => {
     setSubmitting(true);
     setMessage({ type: '', text: '' });
 
-    const data = {
-      title: { fr: formData.title_fr, ar: formData.title_ar },
-      content: { fr: formData.content_fr, ar: formData.content_ar },
-      is_published: formData.is_published,
-      target_audience: formData.target_audience,
-    };
+    // Create FormData to support file uploads
+    const formDataToSend = new FormData();
+    formDataToSend.append('title[fr]', formData.title_fr);
+    formDataToSend.append('title[ar]', formData.title_ar || '');
+    formDataToSend.append('content[fr]', formData.content_fr);
+    formDataToSend.append('content[ar]', formData.content_ar || '');
+    formDataToSend.append('is_published', formData.is_published ? '1' : '0');
+    formDataToSend.append('target_audience', formData.target_audience);
+
+    // Add files if selected
+    if (formData.image) {
+      formDataToSend.append('image', formData.image);
+    }
+    if (formData.pdf) {
+      formDataToSend.append('pdf', formData.pdf);
+    }
+
+    // Add removal flags for update
+    if (editingId) {
+      if (formData.remove_image) {
+        formDataToSend.append('remove_image', '1');
+      }
+      if (formData.remove_pdf) {
+        formDataToSend.append('remove_pdf', '1');
+      }
+    }
 
     try {
       if (editingId) {
-        await axios.put(`/admin/announcements/${editingId}`, data);
+        await axios.put(`/admin/announcements/${editingId}`, formDataToSend, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
         setMessage({ type: 'success', text: 'Annonce modifiée avec succès!' });
       } else {
-        await axios.post('/admin/announcements', data);
+        await axios.post('/admin/announcements', formDataToSend, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
         setMessage({ type: 'success', text: 'Annonce créée avec succès!' });
       }
       handleCloseModal();
@@ -134,6 +170,10 @@ const AnnouncementsManagement = () => {
               content_ar: '',
               is_published: false,
               target_audience: 'all',
+              image: null,
+              pdf: null,
+              remove_image: false,
+              remove_pdf: false,
             });
             setShowModal(true);
           }}
@@ -187,6 +227,32 @@ const AnnouncementsManagement = () => {
                     <p className="text-gray-600 mt-2 line-clamp-2">
                       {announcement.content?.fr || announcement.content}
                     </p>
+                    {/* Display attached files */}
+                    {(announcement.image_path || announcement.pdf_path) && (
+                      <div className="flex items-center gap-3 mt-3">
+                        {announcement.image_path && (
+                          <a
+                            href={announcement.image_url || `/storage/${announcement.image_path}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm"
+                          >
+                            <FaImage /> {announcement.image_filename || 'Image'}
+                          </a>
+                        )}
+                        {announcement.pdf_path && (
+                          <a
+                            href={announcement.pdf_url || `/storage/${announcement.pdf_path}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-red-600 hover:text-red-800 text-sm"
+                          >
+                            <FaFilePdf /> {announcement.pdf_filename || 'PDF'}
+                            <FaDownload className="text-xs" />
+                          </a>
+                        )}
+                      </div>
+                    )}
                     <div className="flex items-center gap-4 mt-4 text-sm text-gray-500">
                       <span>Créé le: {new Date(announcement.created_at).toLocaleDateString('fr-FR')}</span>
                       {announcement.published_at && (
@@ -311,6 +377,80 @@ const AnnouncementsManagement = () => {
                     <option value="specific_specialite">Spécialité spécifique</option>
                   </select>
                 </div>
+                {/* Image Upload */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Image (JPG, PNG - Max 10MB)</label>
+                  {formData.image ? (
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm text-gray-600">{formData.image.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, image: null })}
+                        className="text-red-600 hover:text-red-800 text-sm"
+                      >
+                        <FaTimes />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png"
+                        onChange={(e) => setFormData({ ...formData, image: e.target.files[0] || null })}
+                        className="w-full px-4 py-2 border rounded-lg"
+                      />
+                      {editingId && (
+                        <label className="flex items-center mt-2">
+                          <input
+                            type="checkbox"
+                            checked={formData.remove_image}
+                            onChange={(e) => setFormData({ ...formData, remove_image: e.target.checked })}
+                            className="mr-2"
+                          />
+                          <span className="text-xs text-gray-600">Supprimer l'image existante</span>
+                        </label>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* PDF Upload */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">PDF (Max 10MB)</label>
+                  {formData.pdf ? (
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm text-gray-600">{formData.pdf.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, pdf: null })}
+                        className="text-red-600 hover:text-red-800 text-sm"
+                      >
+                        <FaTimes />
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type="file"
+                        accept="application/pdf"
+                        onChange={(e) => setFormData({ ...formData, pdf: e.target.files[0] || null })}
+                        className="w-full px-4 py-2 border rounded-lg"
+                      />
+                      {editingId && (
+                        <label className="flex items-center mt-2">
+                          <input
+                            type="checkbox"
+                            checked={formData.remove_pdf}
+                            onChange={(e) => setFormData({ ...formData, remove_pdf: e.target.checked })}
+                            className="mr-2"
+                          />
+                          <span className="text-xs text-gray-600">Supprimer le PDF existant</span>
+                        </label>
+                      )}
+                    </>
+                  )}
+                </div>
+
                 <div>
                   <label className="flex items-center">
                     <input

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FaGraduationCap, FaUsers, FaBook, FaAward, FaBuilding } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import { FaGraduationCap, FaUsers, FaBook, FaAward, FaBuilding, FaQuoteLeft, FaSignature } from 'react-icons/fa';
 import { IMAGE_PATHS } from '../constants';
+import AnimatedCard from '../components/AnimatedCard';
 
 const About = () => {
   const { t } = useTranslation();
@@ -190,7 +192,7 @@ const About = () => {
       </div>
 
       {/* Values */}
-      <div className="bg-gradient-to-r from-primary to-secondary text-white rounded-lg p-8">
+      <div className="bg-gradient-to-r from-primary to-secondary text-white rounded-lg p-8 mb-16">
         <h2 className="text-3xl font-bold mb-6">{t('about.values.title')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
@@ -207,6 +209,123 @@ const About = () => {
           </div>
         </div>
       </div>
+
+      {/* Director's Message */}
+      <section className="py-16 bg-gradient-to-br from-gray-50 via-white to-blue-50/20">
+        <div className="container mx-auto px-4">
+          <motion.div
+            className="max-w-5xl mx-auto"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            {/* Header */}
+            <motion.div
+              className="text-center mb-12"
+              initial={{ opacity: 0, y: -20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="inline-flex items-center justify-center mb-4">
+                <div className="bg-primary/10 p-4 rounded-full">
+                  <FaQuoteLeft className="text-primary text-3xl" />
+                </div>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-text-dark mb-3">
+                Le Mot du Directeur
+              </h2>
+              <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary rounded-full mx-auto"></div>
+            </motion.div>
+
+            {/* Main Content Card */}
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-0">
+                {/* Director Image - Left Side */}
+                <motion.div
+                  className="lg:col-span-2 relative bg-gradient-to-br from-primary/5 via-secondary/5 to-primary/10 p-8 lg:p-12 flex items-center justify-center"
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                >
+                  <div className="relative w-full max-w-xs">
+                    {/* Decorative background circles */}
+                    <div className="absolute -top-8 -right-8 w-32 h-32 bg-primary/10 rounded-full blur-2xl"></div>
+                    <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-secondary/10 rounded-full blur-2xl"></div>
+                    
+                    {/* Image container */}
+                    <div className="relative z-10">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full blur-2xl opacity-50"></div>
+                      <img 
+                        src="/images/director/director.png" 
+                        alt="Directeur de l'Institut"
+                        className="relative w-full h-auto rounded-xl shadow-lg object-cover border-4 border-white"
+                        onError={(e) => {
+                          console.error('Director image failed to load');
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Message Content - Right Side */}
+                <motion.div
+                  className="lg:col-span-3 p-8 lg:p-12"
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                >
+                  {/* Greeting */}
+                  <p className="text-xl font-semibold text-gray-800 mb-6">
+                    Chers visiteurs, étudiants et partenaires,
+                  </p>
+
+                  {/* Message paragraphs */}
+                  <div className="space-y-5 text-gray-700 leading-relaxed">
+                    <p className="text-base">
+                      C'est avec une immense fierté et un grand plaisir que je vous souhaite la bienvenue sur le portail numérique de l'<strong className="text-primary">Institut National de Formation Supérieure Paramédicale de Sidi Bel Abbès</strong>.
+                    </p>
+
+                    <p className="text-base">
+                      Notre établissement s'inscrit au cœur de la stratégie nationale de santé, avec pour noble mission de former l'élite paramédicale de demain. Ici, à Sidi Bel Abbès, nous sommes conscients que la qualité des soins repose avant tout sur la compétence, le dévouement et l'éthique des hommes et des femmes qui assistent les patients au quotidien.
+                    </p>
+
+                    <p className="text-base">
+                      Notre projet pédagogique ne se limite pas à la transmission de savoirs théoriques et techniques. Il vise également à inculquer à nos étudiants les valeurs fondamentales de notre profession : <strong className="text-primary">l'humanisme, la responsabilité et le respect de la vie humaine</strong>. Grâce à un corps enseignant qualifié et à des partenariats solides avec les structures hospitalières de la Wilaya, nous assurons une formation alliant excellence académique et réalité du terrain.
+                    </p>
+
+                    <p className="text-base">
+                      Ce site web se veut un trait d'union entre l'administration, le corps enseignant et les étudiants, mais aussi une fenêtre ouverte sur nos activités et nos ambitions.
+                    </p>
+
+                    <p className="text-lg font-semibold text-primary mt-6 italic">
+                      Ensemble, relevons le défi d'un système de santé performant au service du citoyen.
+                    </p>
+                  </div>
+
+                  {/* Signature */}
+                  <div className="mt-10 pt-6 border-t-2 border-gray-200">
+                    <div className="flex items-start gap-4">
+                      <div className="bg-primary/10 p-3 rounded-lg">
+                        <FaSignature className="text-primary text-2xl" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-text-dark text-xl mb-1">Le Directeur</p>
+                        <p className="text-gray-600 text-sm font-medium">Institut National de Formation Supérieure Paramédicale</p>
+                        <p className="text-gray-500 text-sm">Sidi Bel Abbès</p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 };
