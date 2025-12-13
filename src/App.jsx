@@ -14,6 +14,7 @@ import StudentDashboard from './pages/StudentDashboard';
 import StudentSchedule from './pages/StudentSchedule';
 import AdminDashboard from './pages/AdminDashboard';
 import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 
 // Configure axios base URL
@@ -107,12 +108,39 @@ function App() {
           {/* Auth routes */}
           <Route path="/login" element={<Login />} />
           
-          {/* Student routes */}
-          <Route path="/student/dashboard" element={<Layout locale={locale} changeLocale={changeLocale}><StudentDashboard /></Layout>} />
-          <Route path="/student/schedule" element={<Layout locale={locale} changeLocale={changeLocale}><StudentSchedule /></Layout>} />
+          {/* Student routes - Protected */}
+          <Route 
+            path="/student/dashboard" 
+            element={
+              <ProtectedRoute requiredRole="student">
+                <Layout locale={locale} changeLocale={changeLocale}>
+                  <StudentDashboard />
+                </Layout>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/student/schedule" 
+            element={
+              <ProtectedRoute requiredRole="student">
+                <Layout locale={locale} changeLocale={changeLocale}>
+                  <StudentSchedule />
+                </Layout>
+              </ProtectedRoute>
+            } 
+          />
           
-          {/* Admin routes */}
-          <Route path="/admin/dashboard" element={<Layout locale={locale} changeLocale={changeLocale}><AdminDashboard /></Layout>} />
+          {/* Admin routes - Protected */}
+          <Route 
+            path="/admin/dashboard" 
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout locale={locale} changeLocale={changeLocale}>
+                  <AdminDashboard />
+                </Layout>
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </Router>
     </AuthProvider>
