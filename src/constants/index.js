@@ -53,6 +53,7 @@ export const USER_ROLES = {
 };
 
 export const IMAGE_PATHS = {
+  LOGO: '/images/logo.png',
   HERO: {
     SLIDE1: '/images/hero/hero-1.jpg',
     SLIDE2: '/images/hero/hero-2.jpg',

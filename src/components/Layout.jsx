@@ -32,11 +32,22 @@ const Layout = ({ children, locale, changeLocale }) => {
         <nav className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+            <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+              <img 
+                src="/images/logo.png" 
+                alt="INFSPM Logo" 
+                className="h-12 w-auto object-contain max-w-[120px]"
+                onError={(e) => {
+                  // Fallback to text logo if image fails to load
+                  e.target.style.display = 'none';
+                  const fallback = e.target.nextElementSibling;
+                  if (fallback) fallback.classList.remove('hidden');
+                }}
+              />
+              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center hidden">
                 <span className="text-white font-bold text-xl">IP</span>
               </div>
-              <span className="text-xl font-bold text-text-dark">
+              <span className="text-xl font-bold text-text-dark hidden md:block">
                 {locale === 'ar' ? 'المعهد الوطني للتعليم العالي' : 'INFSPM SBA'}
               </span>
             </Link>
