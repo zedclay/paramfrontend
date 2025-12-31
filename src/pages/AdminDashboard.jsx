@@ -56,18 +56,22 @@ const AdminDashboard = () => {
       <div className="bg-white border-b">
         <div className="container mx-auto px-4">
           <div className="flex space-x-1 overflow-x-auto">
-            {[
-              { id: 'dashboard', label: 'Tableau de bord', icon: FaChartLine },
-              { id: 'academic', label: 'Structure Académique', icon: FaGraduationCap },
-              { id: 'planning', label: 'Emplois du Temps', icon: FaCalendarAlt },
-              { id: 'students', label: 'Étudiants', icon: FaUsers },
-              { id: 'notes', label: 'Notes', icon: FaFileAlt },
-              { id: 'content', label: 'Contenu', icon: FaEdit },
-              { id: 'announcements', label: 'Annonces', icon: FaBullhorn },
-              { id: 'downloads', label: 'Téléchargements', icon: FaDownload },
-              { id: 'regulatory-texts', label: 'Textes Réglementaires', icon: FaGavel },
-              { id: 'carousel', label: 'Carousel', icon: FaImage },
-            ].map((tab) => (
+            {(() => {
+              const tabs = [
+                { id: 'dashboard', label: 'Tableau de bord', icon: FaChartLine },
+                { id: 'academic', label: 'Structure Académique', icon: FaGraduationCap },
+                { id: 'planning', label: 'Emplois du Temps', icon: FaCalendarAlt },
+                { id: 'students', label: 'Étudiants', icon: FaUsers },
+                { id: 'notes', label: 'Notes', icon: FaFileAlt },
+                { id: 'content', label: 'Contenu', icon: FaEdit },
+                { id: 'announcements', label: 'Annonces', icon: FaBullhorn },
+                { id: 'downloads', label: 'Téléchargements', icon: FaDownload },
+                { id: 'regulatory-texts', label: 'Textes Réglementaires', icon: FaGavel },
+                { id: 'carousel', label: 'Carousel', icon: FaImage },
+              ];
+              console.log('AdminDashboard tabs:', tabs.length, tabs.map(t => t.label));
+              return tabs;
+            })().map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
