@@ -114,16 +114,31 @@ const Home = () => {
       }
     } catch (error) {
       console.error('Error fetching data:', error);
-      // Fallback to default slides on error
-      setHeroSlides([
-        {
-          title: t('home.hero.slide1.title'),
-          subtitle: t('home.hero.slide1.subtitle'),
-          icon: FaStethoscope,
-          gradient: 'from-blue-600 to-cyan-500',
-          image: '/images/hero/hero-1.jpg',
-        },
-      ]);
+      // Fallback to default slides on error - show all 11 images
+      const gradients = [
+        'from-blue-600 to-cyan-500',
+        'from-emerald-600 to-teal-500',
+        'from-purple-600 to-pink-500',
+        'from-orange-600 to-red-500',
+        'from-indigo-600 to-purple-500',
+        'from-green-600 to-emerald-500',
+        'from-rose-600 to-pink-500',
+        'from-cyan-600 to-blue-500',
+        'from-yellow-600 to-orange-500',
+        'from-violet-600 to-purple-500',
+        'from-teal-600 to-cyan-500',
+      ];
+      
+      const errorFallbackSlides = Array.from({ length: 11 }, (_, i) => ({
+        id: i + 1,
+        title: t('home.hero.slide1.title'),
+        subtitle: t('home.hero.slide1.subtitle'),
+        icon: FaStethoscope,
+        gradient: gradients[i % gradients.length],
+        image: `/images/hero/hero-${i + 1}.jpg`,
+      }));
+      
+      setHeroSlides(errorFallbackSlides);
     } finally {
       setLoading(false);
     }
