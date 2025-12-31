@@ -21,7 +21,7 @@
   "nav": {
     "home": "Accueil",
     "about": "À propos",
-    "academic": "Académique",
+    "academic": "Formations",
     "filieres": "Filières",
     "specialites": "Spécialités",
     "modules": "Modules",
@@ -95,7 +95,7 @@
     "contactUs": "Nous Contacter"
   },
   "about": {
-    "title": "À propos de l'Institut",
+    "title": "Présentation de l'établissement",
     "subtitle": "Institut Paramédical de Sidi Bel Abbès - Excellence en formation paramédicale",
     "mission": {
       "title": "Notre Mission",

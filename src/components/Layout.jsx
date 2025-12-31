@@ -129,6 +129,18 @@ const Layout = ({ children, locale, changeLocale }) => {
                       >
                         {t('nav.modules')}
                       </Link>
+                      <Link
+                        to="/telechargement"
+                        className="block px-4 py-2 text-gray-700 hover:bg-primary hover:text-white transition-colors"
+                      >
+                        Téléchargement
+                      </Link>
+                      <Link
+                        to="/textes-reglementaires"
+                        className="block px-4 py-2 text-gray-700 hover:bg-primary hover:text-white transition-colors"
+                      >
+                        Textes Réglementaires
+                      </Link>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -400,6 +412,26 @@ const Layout = ({ children, locale, changeLocale }) => {
                           }}
                         >
                           {t('nav.modules')}
+                        </Link>
+                        <Link 
+                          to="/telechargement" 
+                          className="block py-2 text-gray-600 hover:text-primary transition"
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            setMobileAcademicOpen(false);
+                          }}
+                        >
+                          Téléchargement
+                        </Link>
+                        <Link 
+                          to="/textes-reglementaires" 
+                          className="block py-2 text-gray-600 hover:text-primary transition"
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            setMobileAcademicOpen(false);
+                          }}
+                        >
+                          Textes Réglementaires
                         </Link>
                       </motion.div>
                     )}

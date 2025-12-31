@@ -85,7 +85,7 @@ const AnnouncementDetail = () => {
         animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-lg shadow-lg overflow-hidden"
       >
-        {/* Image if exists */}
+        {/* Principal Image if exists */}
         {announcement.image_path && (
           <div className="w-full h-96 overflow-hidden">
             <img
@@ -173,6 +173,34 @@ const AnnouncementDetail = () => {
               {content}
             </div>
           </div>
+
+          {/* Multiple Images Gallery */}
+          {announcement.images && announcement.images.length > 0 && (
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <h3 className="text-2xl font-bold mb-4 text-text-dark">Galerie d'images</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {announcement.images.map((img) => (
+                  <div key={img.id} className="relative group">
+                    <a
+                      href={img.image_url || `/storage/${img.image_path}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
+                      <img
+                        src={img.image_url || `/storage/${img.image_path}`}
+                        alt={img.image_filename || 'Image'}
+                        className="w-full h-48 object-cover rounded-lg hover:opacity-90 transition"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Metadata */}
           <div className="mt-8 pt-6 border-t border-gray-200">

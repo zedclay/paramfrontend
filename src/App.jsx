@@ -10,6 +10,8 @@ import Modules from './pages/Modules';
 import Announcements from './pages/Announcements';
 import AnnouncementDetail from './pages/AnnouncementDetail';
 import Contact from './pages/Contact';
+import Telechargement from './pages/Telechargement';
+import TextesReglementaires from './pages/TextesReglementaires';
 import Login from './pages/Login';
 import StudentDashboard from './pages/StudentDashboard';
 import StudentSchedule from './pages/StudentSchedule';
@@ -107,6 +109,8 @@ function App() {
           <Route path="/modules" element={<Layout locale={locale} changeLocale={changeLocale}><Modules /></Layout>} />
           <Route path="/announcements" element={<Layout locale={locale} changeLocale={changeLocale}><Announcements /></Layout>} />
           <Route path="/announcements/:id" element={<Layout locale={locale} changeLocale={changeLocale}><AnnouncementDetail /></Layout>} />
+          <Route path="/telechargement" element={<Layout locale={locale} changeLocale={changeLocale}><Telechargement /></Layout>} />
+          <Route path="/textes-reglementaires" element={<Layout locale={locale} changeLocale={changeLocale}><TextesReglementaires /></Layout>} />
           <Route path="/contact" element={<Layout locale={locale} changeLocale={changeLocale}><Contact /></Layout>} />
           
           {/* Auth routes */}

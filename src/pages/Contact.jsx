@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
 import { IMAGE_PATHS } from '../constants';
 
 const Contact = () => {
@@ -75,7 +75,7 @@ const Contact = () => {
               </div>
               <div>
                 <h3 className="font-semibold text-lg mb-1 text-text-dark">{t('contact.phone')}</h3>
-                <p className="text-gray-600">{contactData?.phone || '+213 XX XXX XXXX'}</p>
+                <p className="text-gray-600">048745831</p>
               </div>
             </div>
 
@@ -85,25 +85,15 @@ const Contact = () => {
               </div>
               <div>
                 <h3 className="font-semibold text-lg mb-1 text-text-dark">{t('contact.email')}</h3>
-                <p className="text-gray-600">{contactData?.email || 'contact@institut-paramedical-sba.dz'}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start">
-              <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mr-4">
-                <FaClock className="text-primary text-xl" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg mb-1 text-text-dark">{t('contact.officeHours')}</h3>
-                <p className="text-gray-600">{contactData?.office_hours?.fr || 'Lundi - Vendredi: 8h00 - 17h00'}</p>
+                <p className="text-gray-600">insfpmsidibelabbes@inpfp.dz</p>
               </div>
             </div>
           </div>
 
           {/* Map placeholder */}
-          <div className="mt-8 bg-gray-200 rounded-lg h-64 flex items-center justify-center">
+          <div className="mt-8 bg-gray-200 rounded-lg h-64 flex items-center justify-center overflow-hidden">
             <img 
-              src={IMAGE_PATHS.CONTACT.LOCATION} 
+              src="/images/contact/contact-image.jpg" 
               alt={t('contact.mapPlaceholder')}
               className="w-full h-full object-cover rounded-lg"
               onError={(e) => {

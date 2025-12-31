@@ -17,11 +17,14 @@ const AnnouncementsManagement = () => {
     content_ar: '',
     is_published: false,
     target_audience: 'all',
-    image: null,
+    image: null, // Principal image
+    images: [], // Multiple images array
     pdf: null,
     remove_image: false,
     remove_pdf: false,
+    remove_images: [], // IDs of images to remove
   });
+  const [existingImages, setExistingImages] = useState([]);
 
   useEffect(() => {
     fetchAnnouncements();
@@ -56,10 +59,13 @@ const AnnouncementsManagement = () => {
       is_published: announcement.is_published || false,
       target_audience: announcement.target_audience || 'all',
       image: null,
+      images: [],
       pdf: null,
       remove_image: false,
       remove_pdf: false,
+      remove_images: [],
     });
+    setExistingImages(announcement.images || []);
     setShowModal(true);
   };
 
@@ -74,10 +80,13 @@ const AnnouncementsManagement = () => {
       is_published: false,
       target_audience: 'all',
       image: null,
+      images: [],
       pdf: null,
       remove_image: false,
       remove_pdf: false,
+      remove_images: [],
     });
+    setExistingImages([]);
     setMessage({ type: '', text: '' });
   };
 
@@ -95,10 +104,18 @@ const AnnouncementsManagement = () => {
     formDataToSend.append('is_published', formData.is_published ? '1' : '0');
     formDataToSend.append('target_audience', formData.target_audience);
 
-    // Add files if selected
+    // Add principal image if selected
     if (formData.image) {
       formDataToSend.append('image', formData.image);
     }
+    
+    // Add multiple images if selected
+    if (formData.images && formData.images.length > 0) {
+      formData.images.forEach((img) => {
+        formDataToSend.append('images[]', img);
+      });
+    }
+    
     if (formData.pdf) {
       formDataToSend.append('pdf', formData.pdf);
     }
@@ -110,6 +127,12 @@ const AnnouncementsManagement = () => {
       }
       if (formData.remove_pdf) {
         formDataToSend.append('remove_pdf', '1');
+      }
+      // Add IDs of images to remove
+      if (formData.remove_images && formData.remove_images.length > 0) {
+        formData.remove_images.forEach((imageId) => {
+          formDataToSend.append('remove_images[]', imageId);
+        });
       }
     }
 
@@ -171,10 +194,13 @@ const AnnouncementsManagement = () => {
               is_published: false,
               target_audience: 'all',
               image: null,
+              images: [],
               pdf: null,
               remove_image: false,
               remove_pdf: false,
+              remove_images: [],
             });
+            setExistingImages([]);
             setShowModal(true);
           }}
           className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark flex items-center transition"
@@ -228,8 +254,8 @@ const AnnouncementsManagement = () => {
                       {announcement.content?.fr || announcement.content}
                     </p>
                     {/* Display attached files */}
-                    {(announcement.image_path || announcement.pdf_path) && (
-                      <div className="flex items-center gap-3 mt-3">
+                    {(announcement.image_path || announcement.pdf_path || (announcement.images && announcement.images.length > 0)) && (
+                      <div className="flex flex-wrap items-center gap-3 mt-3">
                         {announcement.image_path && (
                           <a
                             href={announcement.image_url || `/storage/${announcement.image_path}`}
@@ -237,8 +263,13 @@ const AnnouncementsManagement = () => {
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm"
                           >
-                            <FaImage /> {announcement.image_filename || 'Image'}
+                            <FaImage /> Image principale
                           </a>
+                        )}
+                        {announcement.images && announcement.images.length > 0 && (
+                          <span className="flex items-center gap-2 text-blue-600 text-sm">
+                            <FaImage /> {announcement.images.length} image(s) supplémentaire(s)
+                          </span>
                         )}
                         {announcement.pdf_path && (
                           <a
@@ -377,9 +408,9 @@ const AnnouncementsManagement = () => {
                     <option value="specific_specialite">Spécialité spécifique</option>
                   </select>
                 </div>
-                {/* Image Upload */}
+                {/* Principal Image Upload */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Image (JPG, PNG - Max 10MB)</label>
+                  <label className="block text-sm font-medium mb-2">Image Principale (JPG, PNG - Max 10MB)</label>
                   {formData.image ? (
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-sm text-gray-600">{formData.image.name}</span>
@@ -407,10 +438,86 @@ const AnnouncementsManagement = () => {
                             onChange={(e) => setFormData({ ...formData, remove_image: e.target.checked })}
                             className="mr-2"
                           />
-                          <span className="text-xs text-gray-600">Supprimer l'image existante</span>
+                          <span className="text-xs text-gray-600">Supprimer l'image principale existante</span>
                         </label>
                       )}
                     </>
+                  )}
+                </div>
+
+                {/* Multiple Images Upload */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Images supplémentaires (peuvent être ajoutées sous la description) (JPG, PNG - Max 10MB chacune)</label>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      setFormData({ ...formData, images: [...formData.images, ...files] });
+                    }}
+                    className="w-full px-4 py-2 border rounded-lg"
+                  />
+                  {formData.images.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {formData.images.map((img, idx) => (
+                        <div key={idx} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                          <span className="text-sm text-gray-600">{img.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newImages = formData.images.filter((_, i) => i !== idx);
+                              setFormData({ ...formData, images: newImages });
+                            }}
+                            className="text-red-600 hover:text-red-800 text-sm"
+                          >
+                            <FaTimes />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Existing images in edit mode */}
+                  {editingId && existingImages.length > 0 && (
+                    <div className="mt-3">
+                      <label className="block text-sm font-medium mb-2">Images existantes:</label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {existingImages.map((img) => (
+                          <div key={img.id} className="relative border rounded p-2">
+                            <img
+                              src={img.image_url || `/storage/${img.image_path}`}
+                              alt={img.image_filename}
+                              className="w-full h-24 object-cover rounded"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                            <label className="flex items-center mt-2">
+                              <input
+                                type="checkbox"
+                                checked={formData.remove_images.includes(img.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setFormData({
+                                      ...formData,
+                                      remove_images: [...formData.remove_images, img.id]
+                                    });
+                                  } else {
+                                    setFormData({
+                                      ...formData,
+                                      remove_images: formData.remove_images.filter(id => id !== img.id)
+                                    });
+                                  }
+                                }}
+                                className="mr-1"
+                              />
+                              <span className="text-xs text-gray-600">Supprimer</span>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
 

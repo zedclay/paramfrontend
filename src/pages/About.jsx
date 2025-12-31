@@ -35,7 +35,7 @@ const About = () => {
     <div className="container mx-auto px-4 py-16">
       {/* Hero Section */}
       <div className="text-center mb-16">
-        <h1 className="text-5xl font-bold mb-4 text-text-dark">{t('about.title')}</h1>
+        <h1 className="text-5xl font-bold mb-4 text-text-dark">Présentation de l'établissement</h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
           {t('about.subtitle')}
         </p>
@@ -62,9 +62,25 @@ const About = () => {
             </div>
           </div>
           <div className="p-8">
-            <p className="text-gray-700 leading-relaxed">
-              {t('about.mission.description')}
-            </p>
+            <div className="text-gray-700 leading-relaxed space-y-3">
+              <p>
+                L'institut a pour mission la satisfaction des besoins du secteur de la santé en matière de formation paramédicale, en priorité, et des besoins des secteurs nationaux en cadres paramédicaux qualifiés. A ce titre, il est chargé, notamment :
+              </p>
+              <ul className="list-disc list-inside space-y-2 ml-4">
+                <li>d'assurer la formation supérieure des paramédicaux de santé publique ;</li>
+                <li>d'adopter les supports et les moyens pédagogiques innovants permettant l'application optimale des programmes de formation ;</li>
+                <li>d'évaluer régulièrement la mise en œuvre des programmes de formation et de faire des propositions visant leur amélioration ;</li>
+                <li>de contribuer au développement de la recherche scientifique dans son domaine d'activité ;</li>
+                <li>d'organiser des sessions de formation continue, de perfectionnement et de recyclage, en vue de parfaire les compétences professionnelles des paramédicaux de santé publique ;</li>
+                <li>de proposer des programmes de formation spécialisée, de perfectionnement et de recyclage ;</li>
+                <li>d'organiser et de suivre le déroulement des examens et concours, conformément à la réglementation en vigueur ;</li>
+                <li>de dispenser des formations complémentaires, en vue d'accéder à certains grades ou à la promotion aux grades supérieurs ;</li>
+                <li>de participer à l'élaboration, à l'adaptation et à l'harmonisation des programmes pédagogiques de formation dans les domaines, filières et spécialités en rapport avec son activité ;</li>
+                <li>de contribuer à l'élaboration des travaux d'études relatifs à son domaine de compétence ;</li>
+                <li>d'organiser et/ou de participer aux journées d'études, séminaires, conférences et colloques nationaux traitant de questions entrant dans le domaine de ses compétences ;</li>
+                <li>d'entretenir et de promouvoir des relations de coopération et d'échange avec des institutions et organismes nationaux ayant les mêmes missions.</li>
+              </ul>
+            </div>
           </div>
         </div>
 
@@ -82,13 +98,13 @@ const About = () => {
             <div className="absolute bottom-4 left-4 right-4">
               <div className="flex items-center mb-2">
                 <FaAward className="text-white text-3xl mr-3" />
-                <h2 className="text-2xl font-bold text-white">{t('about.vision.title')}</h2>
+                <h2 className="text-2xl font-bold text-white">ORGANISATION ET FONCTIONNEMENT</h2>
               </div>
             </div>
           </div>
           <div className="p-8">
             <p className="text-gray-700 leading-relaxed">
-              {t('about.vision.description')}
+              L'institut est administré par un conseil d'orientation, dirigé par un directeur et doté d'un conseil scientifique.
             </p>
           </div>
         </div>
@@ -99,8 +115,8 @@ const About = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
           <div className="relative h-64 lg:h-auto min-h-[300px]">
             <img 
-              src={IMAGE_PATHS.ABOUT.BUILDING} 
-              alt={t('about.history.title')}
+              src="/images/contact/contact-image.jpg" 
+              alt="Introduction"
               className="w-full h-full object-cover"
               onError={(e) => {
                 e.target.style.display = 'none';
@@ -110,17 +126,14 @@ const About = () => {
           <div className="p-8">
             <h2 className="text-3xl font-bold mb-6 text-text-dark flex items-center">
               <FaBook className="text-primary mr-3" />
-              {t('about.history.title')}
+              Introduction
             </h2>
             <div className="prose max-w-none text-gray-700">
               <p className="text-lg leading-relaxed mb-4">
-                {t('about.history.p1')}
+                L'institut est un établissement public à caractère administratif, doté de la personnalité morale et de l'autonomie financière. Il est créé par décret exécutif sur rapport conjoint du ministre chargé de la santé et du ministre chargé de l'enseignement supérieur.
               </p>
-              <p className="text-lg leading-relaxed mb-4">
-                {t('about.history.p2')}
-              </p>
-              <p className="text-lg leading-relaxed">
-                {t('about.history.p3')}
+              <p className="text-lg leading-relaxed font-bold">
+                Décret exécutif n° 22-220 du 14 Dhou El Kaâda 1443 correspondant au 14 juin 2022 fixant les missions, l'organisation et le fonctionnement des instituts nationaux de formation supérieure paramédicale.
               </p>
             </div>
           </div>
@@ -151,45 +164,6 @@ const About = () => {
         </div>
       </div>
 
-      {/* Programs Overview */}
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-16">
-        <div className="relative h-64 overflow-hidden">
-          <img 
-            src={IMAGE_PATHS.ABOUT.LABORATORY} 
-            alt={t('about.programs.title')}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.style.display = 'none';
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/50 to-transparent"></div>
-          <div className="absolute bottom-0 left-0 right-0 p-8">
-            <h2 className="text-3xl font-bold mb-2 text-white">{t('about.programs.title')}</h2>
-            <p className="text-white/90 text-lg">
-              {t('about.programs.description')}
-            </p>
-          </div>
-        </div>
-        <div className="p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[
-            'Licence Professionnalisante Infirmier de Santé Publique',
-            'Licence Professionnalisante Kinésithérapeute de Santé Publique',
-            'Licence Professionnalisante Laborantins Santé Publique',
-            'Licence Professionnalisante Manipulateur en Imagerie Médicale',
-            'Licence Professionnalisante Ergothérapeute de Santé Publique',
-            'Licence Professionnalisante Assistant Médical de Santé Publique',
-            'Licence Professionnalisante Assistant Social de Santé Publique',
-            'Licence Professionnalisante Psychomotricité de Santé Publique',
-            'Programme de Formation des Sages-Femmes de Santé Publique',
-          ].map((program, index) => (
-            <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-              <h3 className="font-semibold text-text-dark">{program}</h3>
-            </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* Values */}
       <div className="bg-gradient-to-r from-primary to-secondary text-white rounded-lg p-8 mb-16">
@@ -279,31 +253,25 @@ const About = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: 0.3 }}
                 >
-                  {/* Greeting */}
-                  <p className="text-xl font-semibold text-gray-800 mb-6">
-                    Chers visiteurs, étudiants et partenaires,
-                  </p>
-
                   {/* Message paragraphs */}
-                  <div className="space-y-5 text-gray-700 leading-relaxed">
-                    <p className="text-base">
-                      C'est avec une immense fierté et un grand plaisir que je vous souhaite la bienvenue sur le portail numérique de l'<strong className="text-primary">Institut National de Formation Supérieure Paramédicale de Sidi Bel Abbès</strong>.
+                  <div className="space-y-5 text-gray-700 leading-relaxed" dir="rtl">
+                    <p className="text-base text-right">
+                      بسم الله الرحمن الرحيم
                     </p>
-
-                    <p className="text-base">
-                      Notre établissement s'inscrit au cœur de la stratégie nationale de santé, avec pour noble mission de former l'élite paramédicale de demain. Ici, à Sidi Bel Abbès, nous sommes conscients que la qualité des soins repose avant tout sur la compétence, le dévouement et l'éthique des hommes et des femmes qui assistent les patients au quotidien.
+                    <p className="text-base text-right">
+                      Je voudrais vous souhaiter la bienvenue sur ce site Web, à travers lequel nous aimerions adresser un mot à tous les visiteurs, et tous ceux qui s'intéressent à la formation paramédicale, à noter le début aux efforts considérables consentis par le Ministère de la Santé, de la Population et de la Réforme Hospitalière : « Direction de la Formation », qui travaille en premier lieu, à élever le niveau de formation à tous les stades de l'enseignement paramédical, pour construire un système éducatif de haute qualité qui s'appuie sur l'élément de connaissance comme axe principal du processus de formation, dont le but est de préparer nos étudiants en travaillant au développement de leurs capacités cognitives pour créer une génération capable de faire face aux défis imposés par la réalité sanitaire et sociale et de répondre aux besoins des individus.
                     </p>
-
-                    <p className="text-base">
-                      Notre projet pédagogique ne se limite pas à la transmission de savoirs théoriques et techniques. Il vise également à inculquer à nos étudiants les valeurs fondamentales de notre profession : <strong className="text-primary">l'humanisme, la responsabilité et le respect de la vie humaine</strong>. Grâce à un corps enseignant qualifié et à des partenariats solides avec les structures hospitalières de la Wilaya, nous assurons une formation alliant excellence académique et réalité du terrain.
+                    <p className="text-base text-right">
+                      Notre mission de gérer l'Institut National de Formation Supérieure Paramédicale Sidi Bel Abbes, nous rend heureux d'être au service de notre pays, car nous sommes fiers de la confiance placée en notre personne pour contribuer aux efforts de construction de cet édifice scientifique et travailler à surmonter les difficultés et les obstacles que peuvent rencontrer ses membres dans le domaine de la formation.
                     </p>
-
-                    <p className="text-base">
-                      Ce site web se veut un trait d'union entre l'administration, le corps enseignant et les étudiants, mais aussi une fenêtre ouverte sur nos activités et nos ambitions.
+                    <p className="text-base text-right">
+                      Sur la base de cette vision, l'administration de l'institut accorde une grande attention à l'exploitation de toutes les capacités et à fournir tout le soutien possible pour pousser nos chers étudiants à puiser dans les sources de la science et des connaissances, et à travailler pour formuler une politique intégrée permettant au corps enseignant de pratiquer leurs activités pédagogiques dans des conditions appropriées qui les aident à diffuser et enrichir les connaissances dans une bonne atmosphère.
                     </p>
-
-                    <p className="text-lg font-semibold text-primary mt-6 italic">
-                      Ensemble, relevons le défi d'un système de santé performant au service du citoyen.
+                    <p className="text-base text-right">
+                      Ce que nous recherchons à l'Institut National de Formation Supérieure Paramédicale Sidi Bel Abbes n'est pas impossible, il peut nous être accessible grâce au soutien, et à l'intensification des efforts de tous, enseignants, étudiants et administration…, et travaillant ensemble dans un esprit d'équipe.
+                    </p>
+                    <p className="text-base text-right">
+                      En conclusion, nous espérons que ce site Web sera un lien de communication avec votre institut pour connaître son actualité et mettre à jour ses développements, souhaitant bonne chance à tous ceux qui sont en charge de servir notre système de formation, et réussite à tous nos étudiants.
                     </p>
                   </div>
 
@@ -314,9 +282,8 @@ const About = () => {
                         <FaSignature className="text-primary text-2xl" />
                       </div>
                       <div>
-                        <p className="font-bold text-text-dark text-xl mb-1">Le Directeur</p>
-                        <p className="text-gray-600 text-sm font-medium">Institut National de Formation Supérieure Paramédicale</p>
-                        <p className="text-gray-500 text-sm">Sidi Bel Abbès</p>
+                        <p className="font-bold text-text-dark text-xl mb-1">Mohammed BENADIS</p>
+                        <p className="text-gray-600 text-sm font-medium">Directeur de l'Institut National de Formation Supérieure Paramédicale Sidi Bel Abbès</p>
                       </div>
                     </div>
                   </div>
