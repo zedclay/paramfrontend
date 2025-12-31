@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { FaPlus, FaEdit, FaTrash, FaTimes, FaFilePdf, FaImage, FaDownload } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import logger from '../../utils/logger';
+import { handleApiError } from '../../utils/apiErrorHandler';
 
 const AnnouncementsManagement = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -26,11 +28,7 @@ const AnnouncementsManagement = () => {
   });
   const [existingImages, setExistingImages] = useState([]);
 
-  useEffect(() => {
-    fetchAnnouncements();
-  }, []);
-
-  const fetchAnnouncements = async () => {
+  const fetchAnnouncements = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get('/admin/announcements');
@@ -39,15 +37,20 @@ const AnnouncementsManagement = () => {
         setMessage({ type: 'info', text: 'Aucune annonce trouvée. Créez votre première annonce!' });
       }
     } catch (error) {
-      console.error('Error fetching announcements:', error);
+      logger.error('Error fetching announcements:', error);
+      const { message } = handleApiError(error);
       setMessage({ 
         type: 'error', 
-        text: 'Erreur lors du chargement des annonces: ' + (error.response?.data?.error?.message || 'Erreur inconnue') 
+        text: `Erreur lors du chargement des annonces: ${message}` 
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchAnnouncements();
+  }, [fetchAnnouncements]);
 
   const handleEdit = (announcement) => {
     setEditingId(announcement.id);
@@ -152,10 +155,11 @@ const AnnouncementsManagement = () => {
       fetchAnnouncements();
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
-      console.error('Error saving announcement:', error);
+      logger.error('Error saving announcement:', error);
+      const { message } = handleApiError(error);
       setMessage({ 
         type: 'error', 
-        text: 'Erreur: ' + (error.response?.data?.error?.message || error.response?.data?.error?.details || 'Erreur inconnue') 
+        text: `Erreur: ${message}` 
       });
     } finally {
       setSubmitting(false);
@@ -170,10 +174,11 @@ const AnnouncementsManagement = () => {
       fetchAnnouncements();
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
-      console.error('Error deleting announcement:', error);
+      logger.error('Error deleting announcement:', error);
+      const { message } = handleApiError(error);
       setMessage({ 
         type: 'error', 
-        text: 'Erreur lors de la suppression: ' + (error.response?.data?.error?.message || 'Erreur inconnue') 
+        text: `Erreur lors de la suppression: ${message}` 
       });
       setTimeout(() => setMessage({ type: '', text: '' }), 5000);
     }

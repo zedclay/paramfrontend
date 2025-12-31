@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import logger from '../utils/logger';
+import { handleApiError } from '../utils/apiErrorHandler';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { motion } from 'framer-motion';
@@ -37,19 +39,15 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const locale = i18n.language || 'fr';
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [filieresRes, announcementsRes, slidesRes] = await Promise.all([
         axios.get('/public/filieres'),
         axios.get('/public/announcements'),
         axios.get('/public/hero-slides').catch(() => ({ data: { data: [] } })), // Fallback if API not ready
       ]);
-      setFilieres(filieresRes.data.data);
-      setAnnouncements(announcementsRes.data.data);
+      setFilieres(filieresRes.data.data || []);
+      setAnnouncements(announcementsRes.data.data || []);
       
       // Transform slides from API to component format
       const slides = (slidesRes.data.data || []).map((slide, index) => {
@@ -84,7 +82,7 @@ const Home = () => {
       });
 
       // Always show 11 slides - use API slides if available, otherwise use defaults
-      const gradients = [
+      const gradients = useMemo(() => [
         'from-blue-600 to-cyan-500',
         'from-emerald-600 to-teal-500',
         'from-purple-600 to-pink-500',
@@ -96,31 +94,34 @@ const Home = () => {
         'from-yellow-600 to-orange-500',
         'from-violet-600 to-purple-500',
         'from-teal-600 to-cyan-500',
-      ];
+      ], []);
       
       // Create 11 slides: use API data if available, otherwise use defaults
-      const finalSlides = Array.from({ length: 11 }, (_, i) => {
-        const apiSlide = slides[i];
-        if (apiSlide) {
-          return apiSlide;
-        }
-        // Fallback to default slide with static image path
-        return {
-          id: `default-${i + 1}`,
-          title: t('home.hero.slide1.title'),
-          subtitle: t('home.hero.slide1.subtitle'),
-          icon: FaStethoscope,
-          gradient: gradients[i % gradients.length],
-          image: `/images/hero/hero-${i + 1}.jpg`,
-        };
-      });
+      const finalSlides = useMemo(() => {
+        return Array.from({ length: 11 }, (_, i) => {
+          const apiSlide = slides[i];
+          if (apiSlide) {
+            return apiSlide;
+          }
+          // Fallback to default slide with static image path
+          return {
+            id: `default-${i + 1}`,
+            title: t('home.hero.slide1.title'),
+            subtitle: t('home.hero.slide1.subtitle'),
+            icon: FaStethoscope,
+            gradient: gradients[i % gradients.length],
+            image: `/images/hero/hero-${i + 1}.jpg`,
+          };
+        });
+      }, [slides, gradients, t]);
       
-      console.log(`Hero slides: API returned ${slides.length}, creating ${finalSlides.length} total slides`);
+      // Log removed for production - use logger.debug() if needed for development
       setHeroSlides(finalSlides);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      logger.error('Error fetching home data:', error);
+      handleApiError(error);
       // Fallback to default slides on error - show all 11 images
-      const gradients = [
+      const errorGradients = [
         'from-blue-600 to-cyan-500',
         'from-emerald-600 to-teal-500',
         'from-purple-600 to-pink-500',
@@ -139,7 +140,7 @@ const Home = () => {
         title: t('home.hero.slide1.title'),
         subtitle: t('home.hero.slide1.subtitle'),
         icon: FaStethoscope,
-        gradient: gradients[i % gradients.length],
+        gradient: errorGradients[i % errorGradients.length],
         image: `/images/hero/hero-${i + 1}.jpg`,
       }));
       
@@ -147,7 +148,11 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [locale, t]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   if (loading) {
     return (
