@@ -60,7 +60,7 @@ const Home = () => {
         };
         
         // Determine image path: prefer image_url, then check if image_path is static, otherwise use storage
-        let imagePath = '/images/hero/hero-1.jpeg'; // default fallback
+        let imagePath = '/images/hero/hero-1.jpg'; // default fallback
         if (slide.image_url) {
           imagePath = slide.image_url;
         } else if (slide.image_path) {
@@ -111,7 +111,7 @@ const Home = () => {
           subtitle: t('home.hero.slide1.subtitle'),
           icon: FaStethoscope,
           gradient: gradients[i % gradients.length],
-          image: `/images/hero/hero-${i + 1}.jpeg`,
+          image: `/images/hero/hero-${i + 1}.jpg`,
         };
       });
       
