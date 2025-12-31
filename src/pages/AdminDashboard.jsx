@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
-import { FaUsers, FaFileAlt, FaChartLine, FaBullhorn, FaSearch, FaEdit, FaTrash, FaUpload, FaGraduationCap, FaCalendarAlt, FaImage } from 'react-icons/fa';
+import { FaUsers, FaFileAlt, FaChartLine, FaBullhorn, FaSearch, FaEdit, FaTrash, FaUpload, FaGraduationCap, FaCalendarAlt, FaImage, FaDownload, FaGavel } from 'react-icons/fa';
 import StudentsManagement from '../components/admin/StudentsManagement';
 import NotesManagement from '../components/admin/NotesManagement';
 import ContentManagement from '../components/admin/ContentManagement';
 import AnnouncementsManagement from '../components/admin/AnnouncementsManagement';
+import DownloadsManagement from '../components/admin/DownloadsManagement';
+import RegulatoryTextsManagement from '../components/admin/RegulatoryTextsManagement';
 import AcademicManagement from '../components/admin/AcademicManagement';
 import PlanningManagement from '../components/admin/PlanningManagement';
 import HeroCarouselManagement from '../components/admin/HeroCarouselManagement';
@@ -62,6 +64,8 @@ const AdminDashboard = () => {
               { id: 'notes', label: 'Notes', icon: FaFileAlt },
               { id: 'content', label: 'Contenu', icon: FaEdit },
               { id: 'announcements', label: 'Annonces', icon: FaBullhorn },
+              { id: 'downloads', label: 'Téléchargements', icon: FaDownload },
+              { id: 'regulatory-texts', label: 'Textes Réglementaires', icon: FaGavel },
               { id: 'carousel', label: 'Carousel', icon: FaImage },
             ].map((tab) => (
               <button
@@ -153,6 +157,8 @@ const AdminDashboard = () => {
         {activeTab === 'notes' && <NotesManagement />}
         {activeTab === 'content' && <ContentManagement />}
         {activeTab === 'announcements' && <AnnouncementsManagement />}
+        {activeTab === 'downloads' && <DownloadsManagement />}
+        {activeTab === 'regulatory-texts' && <RegulatoryTextsManagement />}
         {activeTab === 'carousel' && <HeroCarouselManagement />}
       </div>
     </div>
