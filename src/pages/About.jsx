@@ -262,13 +262,13 @@ const About = () => {
                       Je voudrais vous souhaiter la bienvenue sur ce site Web, à travers lequel nous aimerions adresser un mot à tous les visiteurs, et tous ceux qui s'intéressent à la formation paramédicale, à noter le début aux efforts considérables consentis par le Ministère de la Santé, de la Population et de la Réforme Hospitalière : « Direction de la Formation », qui travaille en premier lieu, à élever le niveau de formation à tous les stades de l'enseignement paramédical, pour construire un système éducatif de haute qualité qui s'appuie sur l'élément de connaissance comme axe principal du processus de formation, dont le but est de préparer nos étudiants en travaillant au développement de leurs capacités cognitives pour créer une génération capable de faire face aux défis imposés par la réalité sanitaire et sociale et de répondre aux besoins des individus.
                     </p>
                     <p className="text-base text-right">
-                      Notre mission de gérer l'Institut National de Formation Supérieure Paramédicale Sidi Bel Abbes, nous rend heureux d'être au service de notre pays, car nous sommes fiers de la confiance placée en notre personne pour contribuer aux efforts de construction de cet édifice scientifique et travailler à surmonter les difficultés et les obstacles que peuvent rencontrer ses membres dans le domaine de la formation.
+                      Notre mission de gérer l'Institut national de formation superieure Paramédicale Sidi Bel Abbes, nous rend heureux d'être au service de notre pays, car nous sommes fiers de la confiance placée en notre personne pour contribuer aux efforts de construction de cet édifice scientifique et travailler à surmonter les difficultés et les obstacles que peuvent rencontrer ses membres dans le domaine de la formation.
                     </p>
                     <p className="text-base text-right">
                       Sur la base de cette vision, l'administration de l'institut accorde une grande attention à l'exploitation de toutes les capacités et à fournir tout le soutien possible pour pousser nos chers étudiants à puiser dans les sources de la science et des connaissances, et à travailler pour formuler une politique intégrée permettant au corps enseignant de pratiquer leurs activités pédagogiques dans des conditions appropriées qui les aident à diffuser et enrichir les connaissances dans une bonne atmosphère.
                     </p>
                     <p className="text-base text-right">
-                      Ce que nous recherchons à l'Institut National de Formation Supérieure Paramédicale Sidi Bel Abbes n'est pas impossible, il peut nous être accessible grâce au soutien, et à l'intensification des efforts de tous, enseignants, étudiants et administration…, et travaillant ensemble dans un esprit d'équipe.
+                      Ce que nous recherchons à l'Institut national de formation superieure Paramédicale Sidi Bel Abbes n'est pas impossible, il peut nous être accessible grâce au soutien, et à l'intensification des efforts de tous, enseignants, étudiants et administration…, et travaillant ensemble dans un esprit d'équipe.
                     </p>
                     <p className="text-base text-right">
                       En conclusion, nous espérons que ce site Web sera un lien de communication avec votre institut pour connaître son actualité et mettre à jour ses développements, souhaitant bonne chance à tous ceux qui sont en charge de servir notre système de formation, et réussite à tous nos étudiants.
@@ -283,7 +283,7 @@ const About = () => {
                       </div>
                       <div>
                         <p className="font-bold text-text-dark text-xl mb-1">Mohammed BENADIS</p>
-                        <p className="text-gray-600 text-sm font-medium">Directeur de l'Institut National de Formation Supérieure Paramédicale Sidi Bel Abbès</p>
+                        <p className="text-gray-600 text-sm font-medium">Directeur de l'Institut national de formation superieure Paramédicale Sidi Bel Abbès</p>
                       </div>
                     </div>
                   </div>
