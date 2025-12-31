@@ -54,7 +54,7 @@ const Announcements = () => {
         </div>
         <h1 className="text-5xl font-bold mb-4 text-text-dark">{t('nav.announcements')}</h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          {t('announcements.subtitle') || 'Restez informé des dernières nouvelles et annonces de l\'Institut Paramédical'}
+          {t('announcements.subtitle') || 'Restez informé des dernières nouvelles et annonces de l\'Institut national de formation superieure Paramédicale'}
         </p>
       </motion.div>
 

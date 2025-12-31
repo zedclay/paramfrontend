@@ -34,7 +34,7 @@
   "home": {
     "hero": {
       "slide1": {
-        "title": "Bienvenue à l'Institut Paramédical",
+        "title": "Bienvenue à l'Institut national de formation superieure Paramédicale",
         "subtitle": "Excellence dans la formation paramédicale"
       },
       "slide2": {
@@ -57,7 +57,7 @@
       "yearsExperience": "Années d'expérience"
     },
     "aboutTitle": "À Propos de Notre Institut",
-    "aboutDescription": "L'Institut Paramédical de Sidi Bel Abbès est un établissement d'enseignement supérieur dédié à la formation de professionnels compétents dans le domaine de la santé publique. Nous offrons des programmes de formation de qualité qui préparent nos étudiants à exceller dans leurs carrières paramédicales.",
+    "aboutDescription": "L'Institut national de formation superieure Paramédicale de Sidi Bel Abbès est un établissement d'enseignement supérieur dédié à la formation de professionnels compétents dans le domaine de la santé publique. Nous offrons des programmes de formation de qualité qui préparent nos étudiants à exceller dans leurs carrières paramédicales.",
     "mission": "Notre mission est de dispenser une formation d'excellence basée sur les compétences professionnelles et les valeurs éthiques, tout en préparant nos étudiants à répondre aux besoins croissants du secteur de la santé.",
     "learnMore": "En savoir plus",
     "whyChooseUs": "Pourquoi Choisir Notre Institut ?",
@@ -96,7 +96,7 @@
   },
   "about": {
     "title": "Présentation de l'établissement",
-    "subtitle": "Institut Paramédical de Sidi Bel Abbès - Excellence en formation paramédicale",
+    "subtitle": "Institut national de formation superieure Paramédicale de Sidi Bel Abbès - Excellence en formation paramédicale",
     "mission": {
       "title": "Notre Mission",
       "description": "Former des professionnels paramédicaux compétents et engagés pour répondre aux besoins de santé publique. L'institut s'engage à dispenser une formation de qualité, basée sur les compétences professionnelles et les valeurs éthiques, afin de préparer les étudiants à exercer leur métier avec excellence dans le domaine de la santé publique."
@@ -107,7 +107,7 @@
     },
     "history": {
       "title": "Historique",
-      "p1": "L'Institut Paramédical de Sidi Bel Abbès fait partie du réseau national des instituts de formation paramédicale sous la tutelle de l'Institut National Pédagogique de Formation Paramédicale (INPFP).",
+      "p1": "L'Institut national de formation superieure Paramédicale de Sidi Bel Abbès fait partie du réseau national des instituts de formation paramédicale sous la tutelle de l'Institut National Pédagogique de Formation Paramédicale (INPFP).",
       "p2": "L'institut propose des formations de niveau Licence Professionnalisante dans différents domaines paramédicaux, conformément aux standards nationaux de formation en santé publique. Nos programmes sont conçus pour répondre aux besoins réels du secteur de la santé et préparer les étudiants aux défis professionnels contemporains.",
       "p3": "Depuis sa création, l'institut a formé des centaines de professionnels paramédicaux qui contribuent activement au système de santé algérien, dans les établissements de santé publique à travers le pays."
     },
@@ -190,7 +190,7 @@
     }
   },
   "announcements": {
-    "subtitle": "Restez informé des dernières nouvelles et annonces de l'Institut Paramédical",
+    "subtitle": "Restez informé des dernières nouvelles et annonces de l'Institut national de formation superieure Paramédicale",
     "noAnnouncements": "Aucune annonce pour le moment",
     "noAnnouncementsDesc": "Les annonces seront publiées ici lorsqu'elles seront disponibles."
   },
