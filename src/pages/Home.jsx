@@ -115,6 +115,7 @@ const Home = () => {
         };
       });
       
+      console.log(`Hero slides: API returned ${slides.length}, creating ${finalSlides.length} total slides`);
       setHeroSlides(finalSlides);
     } catch (error) {
       console.error('Error fetching data:', error);
