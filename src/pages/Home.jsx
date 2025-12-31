@@ -31,6 +31,21 @@ import AnimatedCard from '../components/AnimatedCard';
 import { CardSkeleton } from '../components/LoadingSkeleton';
 import { IMAGE_PATHS, getFiliereImage } from '../constants';
 
+// Hero slide gradients - defined outside component for performance
+const HERO_GRADIENTS = [
+  'from-blue-600 to-cyan-500',
+  'from-emerald-600 to-teal-500',
+  'from-purple-600 to-pink-500',
+  'from-orange-600 to-red-500',
+  'from-indigo-600 to-purple-500',
+  'from-green-600 to-emerald-500',
+  'from-rose-600 to-pink-500',
+  'from-cyan-600 to-blue-500',
+  'from-yellow-600 to-orange-500',
+  'from-violet-600 to-purple-500',
+  'from-teal-600 to-cyan-500',
+];
+
 const Home = () => {
   const { t, i18n } = useTranslation();
   const [filieres, setFilieres] = useState([]);
@@ -50,13 +65,7 @@ const Home = () => {
       setAnnouncements(announcementsRes.data.data || []);
       
       // Transform slides from API to component format
-      const slides = (slidesRes.data.data || []).map((slide, index) => {
-        const IconMap = {
-          stethoscope: FaStethoscope,
-          heartbeat: FaHeartbeat,
-          hospital: FaHospital,
-        };
-        
+      const slides = (slidesRes.data.data || []).map((slide) => {
         // Determine image path: prefer image_url, then check if image_path is static, otherwise use storage
         let imagePath = '/images/hero/hero-1.jpg'; // default fallback
         if (slide.image_url) {
@@ -82,65 +91,33 @@ const Home = () => {
       });
 
       // Always show 11 slides - use API slides if available, otherwise use defaults
-      const gradients = useMemo(() => [
-        'from-blue-600 to-cyan-500',
-        'from-emerald-600 to-teal-500',
-        'from-purple-600 to-pink-500',
-        'from-orange-600 to-red-500',
-        'from-indigo-600 to-purple-500',
-        'from-green-600 to-emerald-500',
-        'from-rose-600 to-pink-500',
-        'from-cyan-600 to-blue-500',
-        'from-yellow-600 to-orange-500',
-        'from-violet-600 to-purple-500',
-        'from-teal-600 to-cyan-500',
-      ], []);
+      const finalSlides = Array.from({ length: 11 }, (_, i) => {
+        const apiSlide = slides[i];
+        if (apiSlide) {
+          return apiSlide;
+        }
+        // Fallback to default slide with static image path
+        return {
+          id: `default-${i + 1}`,
+          title: t('home.hero.slide1.title'),
+          subtitle: t('home.hero.slide1.subtitle'),
+          icon: FaStethoscope,
+          gradient: HERO_GRADIENTS[i % HERO_GRADIENTS.length],
+          image: `/images/hero/hero-${i + 1}.jpg`,
+        };
+      });
       
-      // Create 11 slides: use API data if available, otherwise use defaults
-      const finalSlides = useMemo(() => {
-        return Array.from({ length: 11 }, (_, i) => {
-          const apiSlide = slides[i];
-          if (apiSlide) {
-            return apiSlide;
-          }
-          // Fallback to default slide with static image path
-          return {
-            id: `default-${i + 1}`,
-            title: t('home.hero.slide1.title'),
-            subtitle: t('home.hero.slide1.subtitle'),
-            icon: FaStethoscope,
-            gradient: gradients[i % gradients.length],
-            image: `/images/hero/hero-${i + 1}.jpg`,
-          };
-        });
-      }, [slides, gradients, t]);
-      
-      // Log removed for production - use logger.debug() if needed for development
       setHeroSlides(finalSlides);
     } catch (error) {
       logger.error('Error fetching home data:', error);
       handleApiError(error);
       // Fallback to default slides on error - show all 11 images
-      const errorGradients = [
-        'from-blue-600 to-cyan-500',
-        'from-emerald-600 to-teal-500',
-        'from-purple-600 to-pink-500',
-        'from-orange-600 to-red-500',
-        'from-indigo-600 to-purple-500',
-        'from-green-600 to-emerald-500',
-        'from-rose-600 to-pink-500',
-        'from-cyan-600 to-blue-500',
-        'from-yellow-600 to-orange-500',
-        'from-violet-600 to-purple-500',
-        'from-teal-600 to-cyan-500',
-      ];
-      
       const errorFallbackSlides = Array.from({ length: 11 }, (_, i) => ({
         id: i + 1,
         title: t('home.hero.slide1.title'),
         subtitle: t('home.hero.slide1.subtitle'),
         icon: FaStethoscope,
-        gradient: errorGradients[i % errorGradients.length],
+        gradient: HERO_GRADIENTS[i % HERO_GRADIENTS.length],
         image: `/images/hero/hero-${i + 1}.jpg`,
       }));
       
