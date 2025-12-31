@@ -140,7 +140,7 @@ const Home = () => {
         subtitle: t('home.hero.slide1.subtitle'),
         icon: FaStethoscope,
         gradient: gradients[i % gradients.length],
-        image: `/images/hero/hero-${i + 1}.jpeg`,
+        image: `/images/hero/hero-${i + 1}.jpg`,
       }));
       
       setHeroSlides(errorFallbackSlides);
