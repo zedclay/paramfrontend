@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { FaDownload, FaCalendarAlt, FaUser, FaArrowLeft, FaImage, FaFile, FaDownload } from 'react-icons/fa';
+import { FaDownload, FaCalendarAlt, FaUser, FaArrowLeft, FaImage, FaFile } from 'react-icons/fa';
 import { CardSkeleton } from '../components/LoadingSkeleton';
 
 const DownloadDetail = () => {
