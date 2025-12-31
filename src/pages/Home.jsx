@@ -52,12 +52,26 @@ const Home = () => {
       setAnnouncements(announcementsRes.data.data);
       
       // Transform slides from API to component format
-      const slides = (slidesRes.data.data || []).map(slide => {
+      const slides = (slidesRes.data.data || []).map((slide, index) => {
         const IconMap = {
           stethoscope: FaStethoscope,
           heartbeat: FaHeartbeat,
           hospital: FaHospital,
         };
+        
+        // Determine image path: prefer image_url, then check if image_path is static, otherwise use storage
+        let imagePath = '/images/hero/hero-1.jpg'; // default fallback
+        if (slide.image_url) {
+          imagePath = slide.image_url;
+        } else if (slide.image_path) {
+          // If image_path starts with /images/, use it directly (static file)
+          if (slide.image_path.startsWith('/images/')) {
+            imagePath = slide.image_path;
+          } else {
+            // Otherwise it's a Laravel storage path
+            imagePath = `/storage/${slide.image_path}`;
+          }
+        }
         
         return {
           id: slide.id,
@@ -65,35 +79,36 @@ const Home = () => {
           subtitle: slide.subtitle?.[locale] || slide.subtitle?.fr || slide.subtitle || '',
           icon: FaStethoscope, // Default icon, can be extended
           gradient: slide.gradient || 'from-blue-600 to-cyan-500',
-          image: slide.image_url || slide.image_path ? (slide.image_url || `/storage/${slide.image_path}`) : '/images/hero/hero-1.jpg',
+          image: imagePath,
         };
       });
 
-      // If no slides from API, use default slides
+      // If no slides from API, use default slides with all 11 images
       if (slides.length === 0) {
-        setHeroSlides([
-          {
-            title: t('home.hero.slide1.title'),
-            subtitle: t('home.hero.slide1.subtitle'),
-            icon: FaStethoscope,
-            gradient: 'from-blue-600 to-cyan-500',
-            image: '/images/hero/hero-1.jpg',
-          },
-          {
-            title: t('home.hero.slide2.title'),
-            subtitle: t('home.hero.slide2.subtitle'),
-            icon: FaHeartbeat,
-            gradient: 'from-emerald-600 to-teal-500',
-            image: '/images/hero/hero-2.jpg',
-          },
-          {
-            title: t('home.hero.slide3.title'),
-            subtitle: t('home.hero.slide3.subtitle'),
-            icon: FaHospital,
-            gradient: 'from-purple-600 to-pink-500',
-            image: '/images/hero/hero-3.jpg',
-          },
-        ]);
+        const gradients = [
+          'from-blue-600 to-cyan-500',
+          'from-emerald-600 to-teal-500',
+          'from-purple-600 to-pink-500',
+          'from-orange-600 to-red-500',
+          'from-indigo-600 to-purple-500',
+          'from-green-600 to-emerald-500',
+          'from-rose-600 to-pink-500',
+          'from-cyan-600 to-blue-500',
+          'from-yellow-600 to-orange-500',
+          'from-violet-600 to-purple-500',
+          'from-teal-600 to-cyan-500',
+        ];
+        
+        const defaultSlides = Array.from({ length: 11 }, (_, i) => ({
+          id: i + 1,
+          title: t('home.hero.slide1.title'),
+          subtitle: t('home.hero.slide1.subtitle'),
+          icon: FaStethoscope,
+          gradient: gradients[i % gradients.length],
+          image: `/images/hero/hero-${i + 1}.jpg`,
+        }));
+        
+        setHeroSlides(defaultSlides);
       } else {
         setHeroSlides(slides);
       }
