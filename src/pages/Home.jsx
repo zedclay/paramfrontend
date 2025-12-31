@@ -173,7 +173,7 @@ const Home = () => {
                       alt={slide.title}
                       className="w-full h-full object-cover opacity-40"
                       onError={(e) => {
-                        console.error('Image failed to load:', slide.image);
+                        logger.debug('Image failed to load:', slide.image);
                         e.target.style.display = 'none';
                       }}
                     />
@@ -477,7 +477,7 @@ const Home = () => {
                         alt={filiere.name?.fr}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         onError={(e) => {
-                          console.error('Filière image failed to load:', filiere.slug || filiere.id);
+                          logger.debug('Filière image failed to load:', filiere.slug || filiere.id);
                           e.target.src = IMAGE_PATHS.FILIERES.NURSING; // Fallback
                         }}
                       />
