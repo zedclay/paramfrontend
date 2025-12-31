@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaPlus, FaEdit, FaTrash, FaTimes, FaFileAlt, FaImage, FaDownload, FaGavel } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import logger from '../../utils/logger';
+import { handleApiError } from '../../utils/apiErrorHandler';
 
 const RegulatoryTextsManagement = () => {
   const [regulatoryTexts, setRegulatoryTexts] = useState([]);
@@ -39,10 +41,22 @@ const RegulatoryTextsManagement = () => {
         setMessage({ type: 'info', text: 'Aucun texte réglementaire trouvé. Créez votre premier texte réglementaire!' });
       }
     } catch (error) {
-      console.error('Error fetching regulatory texts:', error);
+      logger.error('Error fetching regulatory texts:', error);
+      const { message: errorMsg } = handleApiError(error);
+      
+      // More detailed error message
+      let detailedError = errorMsg;
+      if (error.response?.status === 404) {
+        detailedError = 'Endpoint non trouvé. Vérifiez que le backend est déployé.';
+      } else if (error.response?.status === 500) {
+        detailedError = 'Erreur serveur. Vérifiez les logs du backend.';
+      } else if (!error.response) {
+        detailedError = 'Impossible de se connecter au serveur. Vérifiez votre connexion.';
+      }
+      
       setMessage({ 
         type: 'error', 
-        text: 'Erreur lors du chargement des textes réglementaires: ' + (error.response?.data?.error?.message || 'Erreur inconnue') 
+        text: `Erreur lors du chargement des textes réglementaires: ${detailedError}` 
       });
     } finally {
       setLoading(false);
@@ -152,10 +166,11 @@ const RegulatoryTextsManagement = () => {
       fetchRegulatoryTexts();
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
-      console.error('Error saving regulatory text:', error);
+      logger.error('Error saving regulatory text:', error);
+      const { message: errorMsg } = handleApiError(error);
       setMessage({ 
         type: 'error', 
-        text: 'Erreur: ' + (error.response?.data?.error?.message || error.response?.data?.error?.details || 'Erreur inconnue') 
+        text: `Erreur: ${errorMsg}` 
       });
     } finally {
       setSubmitting(false);
