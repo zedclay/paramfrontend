@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaPlus, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import logger from '../../utils/logger';
+import { handleApiError } from '../../utils/apiErrorHandler';
 
 const ContentManagement = () => {
   const [activeTab, setActiveTab] = useState('filieres');
   const [filieres, setFilieres] = useState([]);
   const [specialites, setSpecialites] = useState([]);
   const [modules, setModules] = useState([]);
+  const [allFilieres, setAllFilieres] = useState([]); // For speciality form
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -16,7 +19,20 @@ const ContentManagement = () => {
 
   useEffect(() => {
     fetchData();
+    // Always fetch filieres for the speciality form selector
+    if (activeTab === 'specialites' && allFilieres.length === 0) {
+      fetchAllFilieres();
+    }
   }, [activeTab]);
+
+  const fetchAllFilieres = async () => {
+    try {
+      const response = await axios.get('/admin/filieres');
+      setAllFilieres(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching filieres:', error);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -32,8 +48,9 @@ const ContentManagement = () => {
         setModules(response.data.data || []);
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
-      setMessage({ type: 'error', text: 'Erreur lors du chargement des données' });
+      logger.error('Error fetching data:', error);
+      const { message: errorMsg } = handleApiError(error);
+      setMessage({ type: 'error', text: `Erreur lors du chargement des données: ${errorMsg}` });
     } finally {
       setLoading(false);
     }
@@ -55,9 +72,9 @@ const ContentManagement = () => {
       fetchData();
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
-      console.error('Error deleting:', error);
-      const errorMsg = error.response?.data?.error?.message || 'Erreur lors de la suppression';
-      setMessage({ type: 'error', text: errorMsg });
+      logger.error('Error deleting:', error);
+      const { message: errorMsg } = handleApiError(error);
+      setMessage({ type: 'error', text: `Erreur lors de la suppression: ${errorMsg}` });
       setTimeout(() => setMessage({ type: '', text: '' }), 5000);
     }
   };
@@ -73,6 +90,11 @@ const ContentManagement = () => {
     try {
       const type = activeTab;
       let dataToSend = { ...formData };
+      
+      // Ensure filiere_id is an integer if it exists
+      if (dataToSend.filiere_id) {
+        dataToSend.filiere_id = parseInt(dataToSend.filiere_id);
+      }
 
       if (editingId) {
         // Update
@@ -88,9 +110,9 @@ const ContentManagement = () => {
       fetchData();
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
-      console.error('Error saving:', error);
-      const errorMsg = error.response?.data?.error?.message || error.response?.data?.error?.details || 'Erreur lors de l\'enregistrement';
-      setMessage({ type: 'error', text: errorMsg });
+      logger.error('Error saving:', error);
+      const { message: errorMsg } = handleApiError(error);
+      setMessage({ type: 'error', text: `Erreur lors de l'enregistrement: ${errorMsg}` });
     }
   };
 
@@ -289,6 +311,25 @@ const ContentManagement = () => {
 
               {activeTab === 'specialites' && (
                 <>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Filière *</label>
+                    <select
+                      required
+                      value={formData.filiere_id || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        filiere_id: e.target.value ? parseInt(e.target.value) : null
+                      })}
+                      className="w-full px-4 py-2 border rounded-lg"
+                    >
+                      <option value="">Sélectionner une filière</option>
+                      {allFilieres.map((filiere) => (
+                        <option key={filiere.id} value={filiere.id}>
+                          {filiere.name?.fr || filiere.name || ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Nom (FR) *</label>
                     <input
