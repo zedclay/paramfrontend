@@ -3,25 +3,25 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { FaGavel, FaCalendarAlt, FaUser, FaImage, FaFile } from 'react-icons/fa';
+import { FaDownload, FaCalendarAlt, FaUser, FaImage, FaFilePdf } from 'react-icons/fa';
 import { CardSkeleton } from '../components/LoadingSkeleton';
 import AnimatedCard from '../components/AnimatedCard';
 
-const TextesReglementaires = () => {
+const Telechargement = () => {
   const { t } = useTranslation();
-  const [regulatoryTexts, setRegulatoryTexts] = useState([]);
+  const [downloads, setTelechargement] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchRegulatoryTexts();
+    fetchTelechargement();
   }, []);
 
-  const fetchRegulatoryTexts = async () => {
+  const fetchTelechargement = async () => {
     try {
-      const response = await axios.get('/public/regulatory-texts');
-      setRegulatoryTexts(response.data.data || []);
+      const response = await axios.get('/public/downloads');
+      setTelechargement(response.data.data || []);
     } catch (error) {
-      console.error('Error fetching regulatory texts:', error);
+      console.error('Error fetching downloads:', error);
     } finally {
       setLoading(false);
     }
@@ -49,38 +49,38 @@ const TextesReglementaires = () => {
       >
         <div className="flex justify-center mb-4">
           <div className="bg-primary/10 p-4 rounded-full">
-            <FaGavel className="text-primary text-5xl" />
+            <FaDownload className="text-primary text-5xl" />
           </div>
         </div>
-        <h1 className="text-5xl font-bold mb-4 text-text-dark">Textes Réglementaires</h1>
+        <h1 className="text-5xl font-bold mb-4 text-text-dark">{t('nav.downloads')}</h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Textes et règlements officiels
+          {t('downloads.subtitle') || 'Restez informé des dernières nouvelles et téléchargements de l\'Institut Paramédical'}
         </p>
       </motion.div>
 
-      {/* Regulatory Texts List */}
-      {regulatoryTexts.length > 0 ? (
+      {/* Telechargement List */}
+      {downloads.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {regulatoryTexts.map((regulatoryText, index) => (
-            <Link key={regulatoryText.id} to={`/textes-reglementaires/${regulatoryText.id}`}>
+          {downloads.map((announcement, index) => (
+            <Link key={announcement.id} to={`/downloads/${announcement.id}`}>
               <AnimatedCard delay={index * 0.1}>
                 <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 h-full flex flex-col cursor-pointer">
                   {/* Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center flex-1">
                       <div className="bg-primary/10 p-2 rounded-lg mr-3">
-                        <FaGavel className="text-primary text-xl" />
+                        <FaDownload className="text-primary text-xl" />
                       </div>
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-text-dark line-clamp-2">
-                          {regulatoryText.title?.fr || regulatoryText.title}
+                          {announcement.title?.fr || announcement.title}
                         </h3>
                         {/* Show image thumbnail if exists */}
-                        {regulatoryText.image_path && (
+                        {announcement.image_path && (
                           <div className="mt-2 w-full h-32 overflow-hidden rounded">
                             <img
-                              src={regulatoryText.image_url || `/storage/${regulatoryText.image_path}`}
-                              alt={regulatoryText.title?.fr || regulatoryText.title}
+                              src={announcement.image_url || `/storage/${announcement.image_path}`}
+                              alt={announcement.title?.fr || announcement.title}
                               className="w-full h-full object-cover"
                               onError={(e) => {
                                 e.target.style.display = 'none';
@@ -95,7 +95,7 @@ const TextesReglementaires = () => {
                   {/* Content */}
                   <div className="flex-1 mb-4">
                     <p className="text-gray-600 line-clamp-4">
-                      {regulatoryText.content?.fr || regulatoryText.content || ''}
+                      {announcement.content?.fr || announcement.content}
                     </p>
                   </div>
 
@@ -105,31 +105,31 @@ const TextesReglementaires = () => {
                       <div className="flex items-center">
                         <FaCalendarAlt className="mr-2" />
                         <span>
-                          {regulatoryText.published_at
-                            ? new Date(regulatoryText.published_at).toLocaleDateString('fr-FR', {
+                          {announcement.published_at
+                            ? new Date(announcement.published_at).toLocaleDateString('fr-FR', {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric',
                               })
-                            : new Date(regulatoryText.created_at).toLocaleDateString('fr-FR', {
+                            : new Date(announcement.created_at).toLocaleDateString('fr-FR', {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric',
                               })}
                         </span>
                       </div>
-                      {regulatoryText.author && (
+                      {announcement.author && (
                         <div className="flex items-center">
                           <FaUser className="mr-1" />
-                          <span className="text-xs">{regulatoryText.author.name}</span>
+                          <span className="text-xs">{announcement.author.name}</span>
                         </div>
                       )}
                     </div>
                     {/* Show file indicators */}
-                    {(regulatoryText.image_path || regulatoryText.file_path) && (
+                    {(announcement.image_path || announcement.pdf_path) && (
                       <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
-                        {regulatoryText.image_path && <FaImage />}
-                        {regulatoryText.file_path && <FaFile />}
+                        {announcement.image_path && <FaImage />}
+                        {announcement.pdf_path && <FaFilePdf />}
                       </div>
                     )}
                   </div>
@@ -145,11 +145,11 @@ const TextesReglementaires = () => {
           className="text-center py-16"
         >
           <div className="bg-gray-100 rounded-full p-8 w-32 h-32 mx-auto mb-6 flex items-center justify-center">
-            <FaGavel className="text-gray-400 text-5xl" />
+            <FaDownload className="text-gray-400 text-5xl" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-700 mb-2">Aucun texte réglementaire pour le moment</h3>
+          <h3 className="text-2xl font-bold text-gray-700 mb-2">{t('downloads.noTelechargement') || 'Aucune téléchargement pour le moment'}</h3>
           <p className="text-gray-500">
-            Les textes réglementaires seront publiés ici lorsqu'ils seront disponibles.
+            {t('downloads.noTelechargementDesc') || 'Les téléchargements seront publiées ici lorsqu\'elles seront disponibles.'}
           </p>
         </motion.div>
       )}
@@ -157,4 +157,5 @@ const TextesReglementaires = () => {
   );
 };
 
-export default TextesReglementaires;
+export default Telechargement;
+

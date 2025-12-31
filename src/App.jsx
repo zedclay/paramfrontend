@@ -9,6 +9,8 @@ import Specialites from './pages/Specialites';
 import Modules from './pages/Modules';
 import Announcements from './pages/Announcements';
 import AnnouncementDetail from './pages/AnnouncementDetail';
+import DownloadDetail from './pages/DownloadDetail';
+import RegulatoryTextDetail from './pages/RegulatoryTextDetail';
 import Contact from './pages/Contact';
 import Telechargement from './pages/Telechargement';
 import TextesReglementaires from './pages/TextesReglementaires';
@@ -110,7 +112,9 @@ function App() {
           <Route path="/announcements" element={<Layout locale={locale} changeLocale={changeLocale}><Announcements /></Layout>} />
           <Route path="/announcements/:id" element={<Layout locale={locale} changeLocale={changeLocale}><AnnouncementDetail /></Layout>} />
           <Route path="/telechargement" element={<Layout locale={locale} changeLocale={changeLocale}><Telechargement /></Layout>} />
+          <Route path="/telechargement/:id" element={<Layout locale={locale} changeLocale={changeLocale}><DownloadDetail /></Layout>} />
           <Route path="/textes-reglementaires" element={<Layout locale={locale} changeLocale={changeLocale}><TextesReglementaires /></Layout>} />
+          <Route path="/textes-reglementaires/:id" element={<Layout locale={locale} changeLocale={changeLocale}><RegulatoryTextDetail /></Layout>} />
           <Route path="/contact" element={<Layout locale={locale} changeLocale={changeLocale}><Contact /></Layout>} />
           
           {/* Auth routes */}
