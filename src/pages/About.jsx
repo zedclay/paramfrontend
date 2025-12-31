@@ -133,7 +133,7 @@ const About = () => {
                 L'institut est un établissement public à caractère administratif, doté de la personnalité morale et de l'autonomie financière. Il est créé par décret exécutif sur rapport conjoint du ministre chargé de la santé et du ministre chargé de l'enseignement supérieur.
               </p>
               <p className="text-lg leading-relaxed font-bold">
-                Décret exécutif n° 22-220 du 14 Dhou El Kaâda 1443 correspondant au 14 juin 2022 fixant les missions, l'organisation et le fonctionnement des instituts nationaux de formation supérieure paramédicale.
+                Décret exécutif n° 22-220 du 14 Dhou El Kaâda 1443 correspondant au 14 juin 2022 fixant les missions, l'organisation et le fonctionnement des Instituts nationaux de formation superieure Paramédicale.
               </p>
             </div>
           </div>

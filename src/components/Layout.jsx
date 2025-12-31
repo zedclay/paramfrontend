@@ -586,7 +586,7 @@ const Layout = ({ children, locale, changeLocale }) => {
               <p className="text-gray-300">
                 {locale === 'ar'
                   ? 'معهد متخصص في التعليم العالي الطبي المساعد'
-                  : 'Institut spécialisé dans la formation supérieure paramédicale'}
+                  : 'Institut national de formation superieure Paramédicale'}
               </p>
             </div>
             <div>
