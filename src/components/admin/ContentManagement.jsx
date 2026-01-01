@@ -157,29 +157,23 @@ const ContentManagement = () => {
     try {
       const type = activeTab;
       
-      // For filieres, use FormData if image is uploaded OR if updating with existing image_url
-      if (activeTab === 'filieres' && (formData.image || editingId)) {
+      // For filieres, always use FormData
+      if (activeTab === 'filieres') {
         const formDataToSend = new FormData();
         
-        // Append name fields - always send fr, ar, en for updates
+        // Append name fields - always send fr, ar, en
         if (formData.name) {
-          // Always send fr, ar, en keys (even if empty) for proper array structure
           ['fr', 'ar', 'en'].forEach((lang) => {
             const value = (formData.name[lang] || '').trim();
-            // For updates, send all fields. For creates, only send non-empty (but fr is required)
-            if (editingId || value || lang === 'fr') {
-              formDataToSend.append(`name[${lang}]`, value);
-            }
+            formDataToSend.append(`name[${lang}]`, value);
           });
         }
         
-        // Append description fields - send all languages
+        // Append description fields - send all languages (can be empty)
         if (formData.description) {
           ['fr', 'ar', 'en'].forEach((lang) => {
             const value = (formData.description[lang] || '').trim();
-            if (editingId || value) {
-              formDataToSend.append(`description[${lang}]`, value);
-            }
+            formDataToSend.append(`description[${lang}]`, value);
           });
         }
         
@@ -189,7 +183,7 @@ const ContentManagement = () => {
         }
         
         // Append order
-        if (formData.order !== undefined) {
+        if (formData.order !== undefined && formData.order !== null) {
           formDataToSend.append('order', formData.order.toString());
         }
         
@@ -198,7 +192,7 @@ const ContentManagement = () => {
           formDataToSend.append('remove_image', '1');
         }
         
-        // For updates, also send existing image_url if no new image and not removing
+        // For updates, send existing image_url if no new image and not removing
         if (editingId && !formData.image && !formData.remove_image && formData.image_url) {
           formDataToSend.append('image_url', formData.image_url);
         }
