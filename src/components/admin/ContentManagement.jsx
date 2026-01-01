@@ -6,19 +6,28 @@ import logger from '../../utils/logger';
 import { handleApiError } from '../../utils/apiErrorHandler';
 import { getMultilingualValue } from '../../utils/multilingual';
 
-// Helper function to get full image URL
-const getImageUrl = (imageUrl) => {
+// Helper function to get full image URL with cache busting
+const getImageUrl = (imageUrl, cacheBust = false) => {
   if (!imageUrl) return null;
   // If it's already a full URL (starts with http), return as is
   if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    if (cacheBust) {
+      return `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+    }
     return imageUrl;
   }
   // If it starts with /storage, use it as-is (relative to current domain)
   // The browser will resolve it relative to the current origin
   if (imageUrl.startsWith('/storage')) {
+    if (cacheBust) {
+      return `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+    }
     return imageUrl;
   }
   // If it doesn't start with /, it might be a relative path - keep it as is
+  if (cacheBust) {
+    return `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+  }
   return imageUrl;
 };
 
@@ -198,17 +207,15 @@ const ContentManagement = () => {
           formDataToSend.append('image_url', formData.image_url);
         }
         
-        if (editingId) {
-          await axios.put(`/admin/${type}/${editingId}`, formDataToSend, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-          });
-          setMessage({ type: 'success', text: 'Élément modifié avec succès' });
-        } else {
-          await axios.post(`/admin/${type}`, formDataToSend, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-          });
-          setMessage({ type: 'success', text: 'Élément créé avec succès' });
-        }
+        const response = editingId
+          ? await axios.put(`/admin/${type}/${editingId}`, formDataToSend, {
+              headers: { 'Content-Type': 'multipart/form-data' }
+            })
+          : await axios.post(`/admin/${type}`, formDataToSend, {
+              headers: { 'Content-Type': 'multipart/form-data' }
+            });
+        
+        setMessage({ type: 'success', text: editingId ? 'Élément modifié avec succès' : 'Élément créé avec succès' });
       } else if (activeTab === 'filieres') {
         // For filieres update without image, use JSON like other types
         let dataToSend = {};
@@ -303,7 +310,12 @@ const ContentManagement = () => {
         }
       }
 
+      // Close modal and refresh data
       handleCloseModal();
+      
+      // Small delay to ensure backend has processed the image
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
       fetchData();
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
@@ -412,6 +424,7 @@ const ContentManagement = () => {
                           src={getImageUrl(item.image_url)} 
                           alt={getDisplayValue(item.name)} 
                           className="w-24 h-24 object-cover rounded-lg"
+                          key={item.image_url} // Force re-render when image_url changes
                           onError={(e) => {
                             logger.debug('Image failed to load:', item.image_url);
                             e.target.style.display = 'none';
@@ -567,6 +580,7 @@ const ContentManagement = () => {
                           src={imagePreview || getImageUrl(formData.image_url)} 
                           alt="Preview" 
                           className="w-full h-48 object-cover rounded-lg border"
+                          key={imagePreview || formData.image_url} // Force re-render when image changes
                           onError={(e) => {
                             logger.debug('Preview image failed to load:', formData.image_url);
                             e.target.style.display = 'none';
