@@ -4,6 +4,33 @@ import { FaPlus, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import logger from '../../utils/logger';
 import { handleApiError } from '../../utils/apiErrorHandler';
+import { getMultilingualValue } from '../../utils/multilingual';
+
+// Helper function to get full image URL
+const getImageUrl = (imageUrl) => {
+  if (!imageUrl) return null;
+  // If it's already a full URL (starts with http), return as is
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl;
+  }
+  // If it starts with /storage, use it as-is (relative to current domain)
+  // The browser will resolve it relative to the current origin
+  if (imageUrl.startsWith('/storage')) {
+    return imageUrl;
+  }
+  // If it doesn't start with /, it might be a relative path - keep it as is
+  return imageUrl;
+};
+
+// Helper function to get display value for admin panel (prefer FR, fallback to AR, EN, or first available)
+const getDisplayValue = (multilingualObj, fallback = '') => {
+  if (!multilingualObj) return fallback;
+  if (typeof multilingualObj === 'string') return multilingualObj;
+  if (typeof multilingualObj !== 'object') return fallback;
+  
+  // Try FR first (admin default), then AR, then EN, then any available
+  return multilingualObj.fr || multilingualObj.ar || multilingualObj.en || Object.values(multilingualObj)[0] || fallback;
+};
 
 const ContentManagement = () => {
   const [activeTab, setActiveTab] = useState('filieres');
@@ -11,17 +38,24 @@ const ContentManagement = () => {
   const [specialites, setSpecialites] = useState([]);
   const [modules, setModules] = useState([]);
   const [allFilieres, setAllFilieres] = useState([]); // For speciality form
+  const [allSpecialites, setAllSpecialites] = useState([]); // For module form
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({});
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [imagePreview, setImagePreview] = useState(null); // For filiere image preview
+  const [submitting, setSubmitting] = useState(false); // For loading state
 
   useEffect(() => {
     fetchData();
     // Always fetch filieres for the speciality form selector
     if (activeTab === 'specialites' && allFilieres.length === 0) {
       fetchAllFilieres();
+    }
+    // Always fetch specialites for the module form selector
+    if (activeTab === 'modules' && allSpecialites.length === 0) {
+      fetchAllSpecialites();
     }
   }, [activeTab]);
 
@@ -31,6 +65,15 @@ const ContentManagement = () => {
       setAllFilieres(response.data.data || []);
     } catch (error) {
       console.error('Error fetching filieres:', error);
+    }
+  };
+
+  const fetchAllSpecialites = async () => {
+    try {
+      const response = await axios.get('/admin/specialites');
+      setAllSpecialites(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching specialites:', error);
     }
   };
 
@@ -58,7 +101,27 @@ const ContentManagement = () => {
 
   const handleEdit = (item) => {
     setEditingId(item.id);
-    setFormData(item);
+    // Clean the item data and map relationships to IDs
+    const cleanItem = { ...item };
+    
+    // Map speciality relationship to specialite_id for modules
+    if (activeTab === 'modules' && item.speciality && item.speciality.id) {
+      cleanItem.specialite_id = item.speciality.id;
+    }
+    
+    // Map filiere relationship to filiere_id for specialities
+    if (activeTab === 'specialites' && item.filiere && item.filiere.id) {
+      cleanItem.filiere_id = item.filiere.id;
+    }
+    
+    // Remove relationship objects and other non-form fields
+    delete cleanItem.speciality;
+    delete cleanItem.filiere;
+    delete cleanItem.created_at;
+    delete cleanItem.updated_at;
+    
+    setFormData(cleanItem);
+    setImagePreview(item.image_url || null);
     setShowModal(true);
     setMessage({ type: '', text: '' });
   };
@@ -83,27 +146,136 @@ const ContentManagement = () => {
     setShowModal(false);
     setEditingId(null);
     setFormData({});
+    setImagePreview(null);
     setMessage({ type: '', text: '' });
   };
 
   const handleSave = async () => {
+    setSubmitting(true);
+    setMessage({ type: '', text: '' });
+    
     try {
       const type = activeTab;
-      let dataToSend = { ...formData };
       
-      // Ensure filiere_id is an integer if it exists
-      if (dataToSend.filiere_id) {
-        dataToSend.filiere_id = parseInt(dataToSend.filiere_id);
-      }
-
-      if (editingId) {
-        // Update
-        await axios.put(`/admin/${type}/${editingId}`, dataToSend);
-        setMessage({ type: 'success', text: 'Élément modifié avec succès' });
+      // For filieres, use FormData if image is uploaded OR if updating with existing image_url
+      if (activeTab === 'filieres' && (formData.image || editingId)) {
+        const formDataToSend = new FormData();
+        
+        // Append name fields
+        if (formData.name) {
+          Object.keys(formData.name).forEach((lang) => {
+            if (formData.name[lang]) {
+              formDataToSend.append(`name[${lang}]`, formData.name[lang]);
+            }
+          });
+        }
+        
+        // Append description fields
+        if (formData.description) {
+          Object.keys(formData.description).forEach((lang) => {
+            if (formData.description[lang]) {
+              formDataToSend.append(`description[${lang}]`, formData.description[lang]);
+            }
+          });
+        }
+        
+        // Append image if it's a File object
+        if (formData.image instanceof File) {
+          formDataToSend.append('image', formData.image);
+        }
+        
+        // Append order
+        if (formData.order !== undefined) {
+          formDataToSend.append('order', formData.order);
+        }
+        
+        // Append remove_image flag if needed
+        if (formData.remove_image) {
+          formDataToSend.append('remove_image', '1');
+        }
+        
+        // For updates, also send existing fields
+        if (editingId && !formData.image && !formData.remove_image && formData.image_url) {
+          formDataToSend.append('image_url', formData.image_url);
+        }
+        
+        if (editingId) {
+          await axios.put(`/admin/${type}/${editingId}`, formDataToSend, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
+          setMessage({ type: 'success', text: 'Élément modifié avec succès' });
+        } else {
+          await axios.post(`/admin/${type}`, formDataToSend, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
+          setMessage({ type: 'success', text: 'Élément créé avec succès' });
+        }
       } else {
-        // Create
-        await axios.post(`/admin/${type}`, dataToSend);
-        setMessage({ type: 'success', text: 'Élément créé avec succès' });
+        // For other types or if no image, use regular JSON
+        // Clean the data to only include valid fields
+        let dataToSend = {};
+        
+        if (activeTab === 'specialites') {
+          // Only send allowed fields for specialities
+          if (formData.filiere_id !== undefined) {
+            dataToSend.filiere_id = parseInt(formData.filiere_id);
+          }
+          if (formData.name !== undefined) {
+            dataToSend.name = formData.name;
+          }
+          if (formData.description !== undefined) {
+            dataToSend.description = formData.description;
+          }
+          if (formData.duration !== undefined) {
+            dataToSend.duration = formData.duration;
+          }
+          if (formData.order !== undefined) {
+            dataToSend.order = parseInt(formData.order) || 0;
+          }
+          if (formData.is_active !== undefined) {
+            dataToSend.is_active = formData.is_active;
+          }
+        } else if (activeTab === 'modules') {
+          // Only send allowed fields for modules
+          if (formData.code !== undefined) {
+            dataToSend.code = formData.code;
+          }
+          if (formData.title !== undefined) {
+            dataToSend.title = formData.title;
+          }
+          if (formData.description !== undefined) {
+            dataToSend.description = formData.description;
+          }
+          if (formData.specialite_id !== undefined) {
+            dataToSend.specialite_id = parseInt(formData.specialite_id);
+          }
+          if (formData.credits !== undefined) {
+            dataToSend.credits = formData.credits ? parseInt(formData.credits) : null;
+          }
+          if (formData.hours !== undefined) {
+            dataToSend.hours = formData.hours ? parseInt(formData.hours) : null;
+          }
+          if (formData.order !== undefined) {
+            dataToSend.order = parseInt(formData.order) || 0;
+          }
+          if (formData.is_active !== undefined) {
+            dataToSend.is_active = formData.is_active;
+          }
+        } else {
+          // Fallback: use all formData (shouldn't happen)
+          dataToSend = { ...formData };
+          if (dataToSend.filiere_id) {
+            dataToSend.filiere_id = parseInt(dataToSend.filiere_id);
+          }
+        }
+
+        if (editingId) {
+          await axios.put(`/admin/${type}/${editingId}`, dataToSend);
+          setMessage({ type: 'success', text: 'Élément modifié avec succès' });
+        } else {
+          await axios.post(`/admin/${type}`, dataToSend);
+          setMessage({ type: 'success', text: 'Élément créé avec succès' });
+        }
       }
 
       handleCloseModal();
@@ -113,14 +285,35 @@ const ContentManagement = () => {
       logger.error('Error saving:', error);
       const { message: errorMsg } = handleApiError(error);
       setMessage({ type: 'error', text: `Erreur lors de l'enregistrement: ${errorMsg}` });
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleCreate = () => {
     setEditingId(null);
     setFormData({});
+    setImagePreview(null);
     setShowModal(true);
     setMessage({ type: '', text: '' });
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({ ...formData, image: file, remove_image: false });
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setFormData({ ...formData, image: null, remove_image: true, image_url: null });
+    setImagePreview(null);
   };
 
   const getTypeLabel = () => {
@@ -188,17 +381,28 @@ const ContentManagement = () => {
               {getCurrentItems().length > 0 ? (
                 getCurrentItems().map((item) => (
                   <div key={item.id} className="border border-gray-200 rounded-lg p-4 flex justify-between items-center hover:shadow-md transition">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg">
-                        {activeTab === 'modules' 
-                          ? `${item.code || ''} - ${item.title?.fr || item.title || ''}`.trim()
-                          : item.name?.fr || item.name || ''}
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {(activeTab === 'modules' 
-                          ? item.description?.fr || item.description || ''
-                          : item.description?.fr || item.description || '').substring(0, 100)}...
-                      </p>
+                    <div className="flex-1 flex items-center gap-4">
+                      {activeTab === 'filieres' && item.image_url && (
+                        <img 
+                          src={getImageUrl(item.image_url)} 
+                          alt={getDisplayValue(item.name)} 
+                          className="w-24 h-24 object-cover rounded-lg"
+                          onError={(e) => {
+                            logger.debug('Image failed to load:', item.image_url);
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      )}
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg">
+                          {activeTab === 'modules' 
+                            ? `${item.code || ''} - ${getDisplayValue(item.title)}`.trim()
+                            : getDisplayValue(item.name)}
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {getDisplayValue(activeTab === 'modules' ? item.description : item.description)?.substring(0, 100) || ''}...
+                        </p>
+                      </div>
                     </div>
                     <div className="flex gap-2 ml-4">
                       <button 
@@ -306,6 +510,69 @@ const ContentManagement = () => {
                       rows={4}
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Description (AR)</label>
+                    <textarea
+                      value={formData.description?.ar || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        description: { ...formData.description, ar: e.target.value }
+                      })}
+                      className="w-full px-4 py-2 border rounded-lg"
+                      rows={4}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Description (EN)</label>
+                    <textarea
+                      value={formData.description?.en || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        description: { ...formData.description, en: e.target.value }
+                      })}
+                      className="w-full px-4 py-2 border rounded-lg"
+                      rows={4}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Image</label>
+                    {imagePreview || formData.image_url ? (
+                      <div className="mb-2">
+                        <img 
+                          src={imagePreview || getImageUrl(formData.image_url)} 
+                          alt="Preview" 
+                          className="w-full h-48 object-cover rounded-lg border"
+                          onError={(e) => {
+                            logger.debug('Preview image failed to load:', formData.image_url);
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="mt-2 text-red-600 hover:text-red-800 text-sm"
+                        >
+                          Supprimer l'image
+                        </button>
+                      </div>
+                    ) : null}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png"
+                      onChange={handleImageChange}
+                      className="w-full px-4 py-2 border rounded-lg"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Formats acceptés: JPEG, PNG (max 10MB)</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Ordre</label>
+                    <input
+                      type="number"
+                      value={formData.order || 0}
+                      onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
+                      className="w-full px-4 py-2 border rounded-lg"
+                    />
+                  </div>
                 </>
               )}
 
@@ -325,7 +592,7 @@ const ContentManagement = () => {
                       <option value="">Sélectionner une filière</option>
                       {allFilieres.map((filiere) => (
                         <option key={filiere.id} value={filiere.id}>
-                          {filiere.name?.fr || filiere.name || ''}
+                          {getDisplayValue(filiere.name)}
                         </option>
                       ))}
                     </select>
@@ -379,11 +646,67 @@ const ContentManagement = () => {
                       rows={4}
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Description (AR)</label>
+                    <textarea
+                      value={formData.description?.ar || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        description: { ...formData.description, ar: e.target.value }
+                      })}
+                      className="w-full px-4 py-2 border rounded-lg"
+                      rows={4}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Description (EN)</label>
+                    <textarea
+                      value={formData.description?.en || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        description: { ...formData.description, en: e.target.value }
+                      })}
+                      className="w-full px-4 py-2 border rounded-lg"
+                      rows={4}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Durée</label>
+                    <input
+                      type="text"
+                      value={formData.duration || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        duration: e.target.value
+                      })}
+                      className="w-full px-4 py-2 border rounded-lg"
+                      placeholder="Ex: 3 ans"
+                    />
+                  </div>
                 </>
               )}
 
               {activeTab === 'modules' && (
                 <>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Spécialité *</label>
+                    <select
+                      required
+                      value={formData.specialite_id || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        specialite_id: e.target.value ? parseInt(e.target.value) : null
+                      })}
+                      className="w-full px-4 py-2 border rounded-lg"
+                    >
+                      <option value="">Sélectionner une spécialité</option>
+                      {allSpecialites.map((specialite) => (
+                        <option key={specialite.id} value={specialite.id}>
+                          {getDisplayValue(specialite.name)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Code *</label>
                     <input
@@ -443,6 +766,30 @@ const ContentManagement = () => {
                       rows={4}
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Description (AR)</label>
+                    <textarea
+                      value={formData.description?.ar || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        description: { ...formData.description, ar: e.target.value }
+                      })}
+                      className="w-full px-4 py-2 border rounded-lg"
+                      rows={4}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Description (EN)</label>
+                    <textarea
+                      value={formData.description?.en || ''}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        description: { ...formData.description, en: e.target.value }
+                      })}
+                      className="w-full px-4 py-2 border rounded-lg"
+                      rows={4}
+                    />
+                  </div>
                 </>
               )}
             </div>
@@ -458,9 +805,22 @@ const ContentManagement = () => {
               <button
                 type="button"
                 onClick={handleSave}
-                className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark transition"
+                disabled={submitting}
+                className={`flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary-dark transition flex items-center justify-center ${
+                  submitting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
-                {editingId ? 'Modifier' : 'Créer'}
+                {submitting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {editingId ? 'Modification...' : 'Création...'}
+                  </>
+                ) : (
+                  editingId ? 'Modifier' : 'Créer'
+                )}
               </button>
             </div>
           </motion.div>
