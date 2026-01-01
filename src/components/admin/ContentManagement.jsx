@@ -157,8 +157,9 @@ const ContentManagement = () => {
     try {
       const type = activeTab;
       
-      // For filieres, always use FormData
-      if (activeTab === 'filieres') {
+      // For filieres, use FormData only if there's an image, otherwise use JSON
+      if (activeTab === 'filieres' && (formData.image instanceof File || (!editingId && !formData.image))) {
+        // Use FormData when there's an image OR when creating (to handle potential future images)
         const formDataToSend = new FormData();
         
         // Append name fields - always send fr, ar, en
@@ -206,6 +207,32 @@ const ContentManagement = () => {
           await axios.post(`/admin/${type}`, formDataToSend, {
             headers: { 'Content-Type': 'multipart/form-data' }
           });
+          setMessage({ type: 'success', text: 'Élément créé avec succès' });
+        }
+      } else if (activeTab === 'filieres') {
+        // For filieres update without image, use JSON like other types
+        let dataToSend = {};
+        if (formData.name !== undefined) {
+          dataToSend.name = formData.name;
+        }
+        if (formData.description !== undefined) {
+          dataToSend.description = formData.description;
+        }
+        if (formData.order !== undefined) {
+          dataToSend.order = parseInt(formData.order) || 0;
+        }
+        if (formData.is_active !== undefined) {
+          dataToSend.is_active = formData.is_active;
+        }
+        if (formData.remove_image) {
+          dataToSend.remove_image = true;
+        }
+        
+        if (editingId) {
+          await axios.put(`/admin/${type}/${editingId}`, dataToSend);
+          setMessage({ type: 'success', text: 'Élément modifié avec succès' });
+        } else {
+          await axios.post(`/admin/${type}`, dataToSend);
           setMessage({ type: 'success', text: 'Élément créé avec succès' });
         }
       } else {
