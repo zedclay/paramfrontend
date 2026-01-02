@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { FaBook, FaGraduationCap, FaClock } from 'react-icons/fa';
+import { getMultilingualValueFromI18n } from '../utils/multilingual';
 
 const Modules = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [searchParams] = useSearchParams();
   const specialiteId = searchParams.get('specialite_id');
   const [modules, setModules] = useState([]);
@@ -58,7 +59,7 @@ const Modules = () => {
           <div className="flex items-start justify-between mb-6">
             <div>
               <span className="text-primary font-semibold text-lg">{selectedModule.code}</span>
-              <h1 className="text-4xl font-bold mt-2 text-text-dark">{selectedModule.title?.fr}</h1>
+              <h1 className="text-4xl font-bold mt-2 text-text-dark">{getMultilingualValueFromI18n(selectedModule.title, i18n)}</h1>
             </div>
           </div>
 
@@ -78,7 +79,7 @@ const Modules = () => {
             {selectedModule.speciality && (
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="text-sm text-gray-600">Spécialité</div>
-                <div className="text-lg font-semibold text-text-dark">{selectedModule.speciality.name?.fr}</div>
+                <div className="text-lg font-semibold text-text-dark">{getMultilingualValueFromI18n(selectedModule.speciality.name, i18n)}</div>
               </div>
             )}
           </div>
@@ -86,14 +87,14 @@ const Modules = () => {
           {selectedModule.description && (
             <div className="mb-8">
               <h3 className="text-2xl font-semibold mb-4 text-text-dark">Description</h3>
-              <p className="text-gray-700 leading-relaxed">{selectedModule.description?.fr}</p>
+              <p className="text-gray-700 leading-relaxed">{getMultilingualValueFromI18n(selectedModule.description, i18n)}</p>
             </div>
           )}
 
           {selectedModule.speciality?.filiere && (
             <div className="border-t pt-6">
               <p className="text-gray-600">
-                <strong>Filière:</strong> {selectedModule.speciality.filiere.name?.fr}
+                <strong>Filière:</strong> {getMultilingualValueFromI18n(selectedModule.speciality.filiere.name, i18n)}
               </p>
             </div>
           )}
@@ -126,7 +127,7 @@ const Modules = () => {
               onClick={() => window.location.href = `/modules?specialite_id=${specialite.id}`}
               className={`px-4 py-2 rounded-lg ${specialiteId == specialite.id ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700'}`}
             >
-              {specialite.name?.fr}
+              {getMultilingualValueFromI18n(specialite.name, i18n)}
             </button>
           ))}
         </div>
@@ -147,12 +148,12 @@ const Modules = () => {
                 </span>
               )}
             </div>
-            <h3 className="text-xl font-semibold mb-3 text-text-dark">{module.title?.fr}</h3>
+            <h3 className="text-xl font-semibold mb-3 text-text-dark">{getMultilingualValueFromI18n(module.title, i18n)}</h3>
             {module.description && (
-              <p className="text-gray-600 mb-4 line-clamp-2">{module.description.fr}</p>
+              <p className="text-gray-600 mb-4 line-clamp-2">{getMultilingualValueFromI18n(module.description, i18n)}</p>
             )}
             {module.speciality && (
-              <p className="text-sm text-gray-500 mb-4">{module.speciality.name?.fr}</p>
+              <p className="text-sm text-gray-500 mb-4">{getMultilingualValueFromI18n(module.speciality.name, i18n)}</p>
             )}
             <span className="text-primary font-medium">Voir détails →</span>
           </div>

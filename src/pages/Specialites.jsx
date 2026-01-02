@@ -4,9 +4,10 @@ import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { FaBook, FaClock, FaBuilding } from 'react-icons/fa';
 import { IMAGE_PATHS, getFiliereImage, getSpecialiteImage } from '../constants';
+import { getMultilingualValueFromI18n } from '../utils/multilingual';
 
 const Specialites = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [searchParams] = useSearchParams();
   const filiereId = searchParams.get('filiere_id');
   const [specialites, setSpecialites] = useState([]);
@@ -60,7 +61,7 @@ const Specialites = () => {
           <div className="relative h-64 overflow-hidden">
             <img 
               src={getSpecialiteImage(selectedSpecialite)} 
-              alt={selectedSpecialite.name?.fr}
+              alt={getMultilingualValueFromI18n(selectedSpecialite.name, i18n)}
               className="w-full h-full object-cover"
               onError={(e) => {
                 e.target.src = IMAGE_PATHS.SPECIALITES.DEFAULT;
@@ -68,12 +69,12 @@ const Specialites = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/50 to-transparent"></div>
             <div className="absolute bottom-0 left-0 right-0 p-6">
-              <h1 className="text-4xl font-bold mb-2 text-white drop-shadow-lg">{selectedSpecialite.name?.fr}</h1>
-              <p className="text-white/90 text-lg">{selectedSpecialite.description?.fr?.substring(0, 150)}...</p>
+              <h1 className="text-4xl font-bold mb-2 text-white drop-shadow-lg">{getMultilingualValueFromI18n(selectedSpecialite.name, i18n)}</h1>
+              <p className="text-white/90 text-lg">{getMultilingualValueFromI18n(selectedSpecialite.description, i18n)?.substring(0, 150)}...</p>
             </div>
           </div>
           <div className="p-8">
-            <p className="text-lg text-gray-700 mb-6">{selectedSpecialite.description?.fr}</p>
+            <p className="text-lg text-gray-700 mb-6">{getMultilingualValueFromI18n(selectedSpecialite.description, i18n)}</p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {selectedSpecialite.duration && (
@@ -85,7 +86,7 @@ const Specialites = () => {
             {selectedSpecialite.filiere && (
               <div className="flex items-center">
                 <FaBook className="text-primary mr-3" />
-                <span className="text-gray-700"><strong>Filière:</strong> {selectedSpecialite.filiere.name?.fr}</span>
+                <span className="text-gray-700"><strong>Filière:</strong> {getMultilingualValueFromI18n(selectedSpecialite.filiere.name, i18n)}</span>
               </div>
             )}
           </div>
@@ -96,7 +97,7 @@ const Specialites = () => {
               <div className="space-y-4">
                 {selectedSpecialite.establishments.map((establishment) => (
                   <div key={establishment.id} className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="font-semibold text-lg text-primary mb-2">{establishment.name?.fr}</h4>
+                    <h4 className="font-semibold text-lg text-primary mb-2">{getMultilingualValueFromI18n(establishment.name, i18n)}</h4>
                     {establishment.address && <p className="text-gray-600">{establishment.address}</p>}
                     {establishment.contact_email && <p className="text-gray-600">Email: {establishment.contact_email}</p>}
                     {establishment.contact_phone && <p className="text-gray-600">Téléphone: {establishment.contact_phone}</p>}
@@ -116,9 +117,9 @@ const Specialites = () => {
                       <h4 className="font-semibold text-primary">{module.code}</h4>
                       {module.credits && <span className="text-sm text-gray-500">{module.credits} crédits</span>}
                     </div>
-                    <p className="text-gray-700 font-medium">{module.title?.fr}</p>
+                    <p className="text-gray-700 font-medium">{getMultilingualValueFromI18n(module.title, i18n)}</p>
                     {module.description && (
-                      <p className="text-gray-600 text-sm mt-2">{module.description.fr?.substring(0, 100)}...</p>
+                      <p className="text-gray-600 text-sm mt-2">{getMultilingualValueFromI18n(module.description, i18n)?.substring(0, 100)}...</p>
                     )}
                   </div>
                 ))}
@@ -155,7 +156,7 @@ const Specialites = () => {
               onClick={() => window.location.href = `/specialites?filiere_id=${filiere.id}`}
               className={`px-4 py-2 rounded-lg ${filiereId == filiere.id ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700'}`}
             >
-              {filiere.name?.fr}
+              {getMultilingualValueFromI18n(filiere.name, i18n)}
             </button>
           ))}
         </div>
@@ -171,7 +172,7 @@ const Specialites = () => {
             <div className="relative h-48 overflow-hidden">
               <img 
                 src={getSpecialiteImage(specialite)} 
-                alt={specialite.name?.fr}
+                alt={getMultilingualValueFromI18n(specialite.name, i18n)}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 onError={(e) => {
                   e.target.src = IMAGE_PATHS.SPECIALITES.DEFAULT;
@@ -179,11 +180,11 @@ const Specialites = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent"></div>
               <div className="absolute bottom-4 left-4 right-4">
-                <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">{specialite.name?.fr}</h3>
+                <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">{getMultilingualValueFromI18n(specialite.name, i18n)}</h3>
               </div>
             </div>
             <div className="p-6">
-              <p className="text-gray-600 mb-4 line-clamp-3">{specialite.description?.fr}</p>
+              <p className="text-gray-600 mb-4 line-clamp-3">{getMultilingualValueFromI18n(specialite.description, i18n)}</p>
               <div className="flex items-center justify-between">
                 {specialite.duration && (
                   <span className="text-sm text-gray-500 flex items-center">

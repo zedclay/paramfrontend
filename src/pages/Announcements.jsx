@@ -6,9 +6,10 @@ import { motion } from 'framer-motion';
 import { FaBullhorn, FaCalendarAlt, FaUser, FaImage, FaFilePdf } from 'react-icons/fa';
 import { CardSkeleton } from '../components/LoadingSkeleton';
 import AnimatedCard from '../components/AnimatedCard';
+import { getMultilingualValueFromI18n } from '../utils/multilingual';
 
 const Announcements = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -73,14 +74,14 @@ const Announcements = () => {
                       </div>
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-text-dark line-clamp-2">
-                          {announcement.title?.fr || announcement.title}
+                          {getMultilingualValueFromI18n(announcement.title, i18n)}
                         </h3>
                         {/* Show image thumbnail if exists */}
                         {announcement.image_path && (
                           <div className="mt-2 w-full h-32 overflow-hidden rounded">
                             <img
                               src={announcement.image_url || `/storage/${announcement.image_path}`}
-                              alt={announcement.title?.fr || announcement.title}
+                              alt={getMultilingualValueFromI18n(announcement.title, i18n)}
                               className="w-full h-full object-cover"
                               onError={(e) => {
                                 e.target.style.display = 'none';
@@ -95,7 +96,7 @@ const Announcements = () => {
                   {/* Content */}
                   <div className="flex-1 mb-4">
                     <p className="text-gray-600 line-clamp-4">
-                      {announcement.content?.fr || announcement.content}
+                      {getMultilingualValueFromI18n(announcement.content, i18n)}
                     </p>
                   </div>
 

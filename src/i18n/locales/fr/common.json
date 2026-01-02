@@ -145,6 +145,16 @@
     "duration": "Durée",
     "learnMore": "En savoir plus"
   },
+  "specialites": {
+    "title": "Nos Spécialités",
+    "subtitle": "Explorez nos spécialisations paramédicales",
+    "back": "Retour aux spécialités"
+  },
+  "modules": {
+    "title": "Nos Modules",
+    "subtitle": "Découvrez nos modules de formation",
+    "back": "Retour aux modules"
+  },
   "contact": {
     "title": "Contactez-nous",
     "subtitle": "Nous sommes là pour répondre à vos questions",

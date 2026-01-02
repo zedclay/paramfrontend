@@ -145,6 +145,16 @@
     "duration": "Duration",
     "learnMore": "Learn More"
   },
+  "specialites": {
+    "title": "Our Specialties",
+    "subtitle": "Explore our paramedical specializations",
+    "back": "Back to Specialties"
+  },
+  "modules": {
+    "title": "Our Modules",
+    "subtitle": "Discover our training modules",
+    "back": "Back to Modules"
+  },
   "contact": {
     "title": "Contact Us",
     "subtitle": "We are here to answer your questions",

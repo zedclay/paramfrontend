@@ -29,7 +29,23 @@ import {
 } from 'react-icons/fa';
 import AnimatedCard from '../components/AnimatedCard';
 import { CardSkeleton } from '../components/LoadingSkeleton';
-import { IMAGE_PATHS, getFiliereImage } from '../constants';
+import { getMultilingualValueFromI18n } from '../utils/multilingual';
+
+// Helper function to get full image URL
+const getImageUrl = (imageUrl) => {
+  if (!imageUrl) return null;
+  // If it's already a full URL (starts with http), return as is
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl;
+  }
+  // If it starts with /storage, use it as-is (relative to current domain)
+  // The browser will resolve it relative to the current origin
+  if (imageUrl.startsWith('/storage')) {
+    return imageUrl;
+  }
+  // If it doesn't start with /, it might be a relative path - keep it as is
+  return imageUrl;
+};
 
 // Hero slide gradients - defined outside component for performance
 const HERO_GRADIENTS = [
@@ -470,20 +486,20 @@ const Home = () => {
                     {/* Gradient overlay on hover */}
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     
-                    {/* Filière Image */}
-                    <div className="relative h-48 mb-4 rounded-lg overflow-hidden">
-                      <img 
-                        src={getFiliereImage(filiere.slug || filiere.id)} 
-                        alt={filiere.name?.fr}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        onError={(e) => {
-                          logger.debug('Filière image failed to load:', filiere.slug || filiere.id);
-                          e.target.src = IMAGE_PATHS.FILIERES.NURSING; // Fallback
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-primary/30 to-transparent"></div>
-                    </div>
-                    
+                    {filiere.image_url && (
+                      <div className="relative h-48 mb-4 rounded-lg overflow-hidden">
+                        <img 
+                          src={getImageUrl(filiere.image_url)} 
+                          alt={getMultilingualValueFromI18n(filiere.name, i18n)}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          onError={(e) => {
+                            logger.debug('Filière image failed to load:', filiere.image_url);
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-primary/30 to-transparent"></div>
+                      </div>
+                    )}
                     <h3 className="text-xl font-bold mb-3 text-text-dark relative z-10 group-hover:text-primary transition-colors">
                       {filiere.name?.fr}
                     </h3>
@@ -573,7 +589,7 @@ const Home = () => {
                       </div>
                       <div className="flex-1">
                         <h3 className="text-lg font-bold mb-2 text-text-dark line-clamp-2">
-                          {announcement.title?.fr}
+                          {getMultilingualValueFromI18n(announcement.title, i18n)}
                         </h3>
                         <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
                           <FaCalendarAlt />
@@ -586,7 +602,7 @@ const Home = () => {
                       </div>
                     </div>
                     <p className="text-gray-600 flex-1 line-clamp-3 mb-4">
-                      {announcement.content?.fr?.substring(0, 150)}...
+                      {getMultilingualValueFromI18n(announcement.content, i18n)?.substring(0, 150)}...
                     </p>
                     <Link to="/announcements" className="text-primary font-semibold text-sm hover:text-primary-dark flex items-center gap-1">
                       {t('home.readMore')} <FaArrowRight className="text-xs" />

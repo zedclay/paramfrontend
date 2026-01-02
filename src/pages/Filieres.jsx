@@ -6,18 +6,42 @@ import axios from 'axios';
 import { FaArrowRight, FaGraduationCap } from 'react-icons/fa';
 import AnimatedCard from '../components/AnimatedCard';
 import { CardSkeleton } from '../components/LoadingSkeleton';
-import { IMAGE_PATHS, getFiliereImage } from '../constants';
+import { getMultilingualValueFromI18n } from '../utils/multilingual';
+import { getFiliereImage } from '../constants';
+
+// Helper function to get full image URL with cache busting
+const getImageUrl = (imageUrl, cacheBust = false) => {
+  if (!imageUrl) return null;
+  // If it's already a full URL (starts with http), return as is
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    if (cacheBust) {
+      return `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+    }
+    return imageUrl;
+  }
+  // If it starts with /storage, use it as-is (relative to current domain)
+  if (imageUrl.startsWith('/storage')) {
+    if (cacheBust) {
+      return `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+    }
+    return imageUrl;
+  }
+  // If it doesn't start with /, it might be a relative path - keep it as is
+  if (cacheBust) {
+    return `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+  }
+  return imageUrl;
+};
+
 
 const Filieres = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [filieres, setFilieres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedFiliere, setSelectedFiliere] = useState(null);
   const [filiereLoading, setFiliereLoading] = useState(false);
-
-  // Get image for filiere card - uses specific image for each filière
 
   useEffect(() => {
     fetchFilieres();
@@ -33,7 +57,19 @@ const Filieres = () => {
 
   const fetchFilieres = async () => {
     try {
-      const response = await axios.get('/public/filieres');
+      const response = await axios.get('/public/filieres', {
+        params: { _t: Date.now() } // Cache busting
+      });
+      console.log('Filieres fetched:', response.data.data);
+      // Log ALL image URLs for debugging (including null)
+      response.data.data.forEach(f => {
+        const name = getMultilingualValueFromI18n(f.name, i18n);
+        if (f.image_url) {
+          console.log(`✅ Filiere ${f.id} (${name}): image_url = ${f.image_url}`);
+        } else {
+          console.warn(`⚠️ Filiere ${f.id} (${name}): image_url = NULL (will use fallback: ${getFiliereImage(f.slug)})`);
+        }
+      });
       setFilieres(response.data.data);
     } catch (error) {
       console.error('Error fetching filieres:', error);
@@ -115,17 +151,35 @@ const Filieres = () => {
                 {/* Filière Header with Image */}
                 <div className="relative h-64 mb-6 rounded-lg overflow-hidden">
                   <img 
-                    src={getFiliereImage(selectedFiliere.slug || selectedFiliere.id)} 
-                    alt={selectedFiliere.name?.fr}
+                    src={selectedFiliere.image_url ? getImageUrl(selectedFiliere.image_url, true) : getFiliereImage(selectedFiliere.slug)} 
+                    alt={getMultilingualValueFromI18n(selectedFiliere.name, i18n)}
                     className="w-full h-full object-cover"
+                    key={`${selectedFiliere.id}-${selectedFiliere.image_url || 'fallback'}-${selectedFiliere.slug}`}
                     onError={(e) => {
-                      e.target.src = IMAGE_PATHS.FILIERES.NURSING;
+                      console.error('❌ Filière detail image failed to load:', {
+                        filiere_id: selectedFiliere.id,
+                        image_url: selectedFiliere.image_url || 'NULL',
+                        fallback_used: !selectedFiliere.image_url,
+                        attempted_url: e.target.src
+                      });
+                      // Try fallback if uploaded image fails
+                      if (selectedFiliere.image_url && e.target.src !== getFiliereImage(selectedFiliere.slug)) {
+                        e.target.onerror = null;
+                        e.target.src = getFiliereImage(selectedFiliere.slug);
+                      } else {
+                        e.target.onerror = null;
+                        e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="400"%3E%3Crect fill="%23f0f0f0" width="800" height="400"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="16" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage non disponible%3C/text%3E%3C/svg%3E';
+                      }
+                    }}
+                    onLoad={() => {
+                      const imageSource = selectedFiliere.image_url ? 'uploaded' : 'fallback';
+                      console.log(`✅ Detail image loaded successfully (${imageSource}):`, selectedFiliere.image_url || getFiliereImage(selectedFiliere.slug));
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/50 to-transparent"></div>
                   <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h2 className="text-4xl font-bold mb-2 text-white drop-shadow-lg">{selectedFiliere.name?.fr}</h2>
-                    <p className="text-white/90 text-lg">{selectedFiliere.description?.fr?.substring(0, 150)}...</p>
+                    <h2 className="text-4xl font-bold mb-2 text-white drop-shadow-lg">{getMultilingualValueFromI18n(selectedFiliere.name, i18n)}</h2>
+                    <p className="text-white/90 text-lg">{getMultilingualValueFromI18n(selectedFiliere.description, i18n)?.substring(0, 150)}...</p>
                   </div>
                 </div>
                 
@@ -141,18 +195,25 @@ const Filieres = () => {
                           >
                             <div className="relative h-32 overflow-hidden">
                               <img 
-                                src={getFiliereImage(selectedFiliere.slug || selectedFiliere.id)} 
-                                alt={speciality.name?.fr}
+                                src={selectedFiliere.image_url ? getImageUrl(selectedFiliere.image_url, true) : getFiliereImage(selectedFiliere.slug)} 
+                                alt={getMultilingualValueFromI18n(speciality.name, i18n)}
                                 className="w-full h-full object-cover"
+                                key={`${selectedFiliere.id}-${selectedFiliere.image_url || 'fallback'}`}
                                 onError={(e) => {
-                                  e.target.src = IMAGE_PATHS.FILIERES.NURSING;
+                                  // Try fallback
+                                  if (selectedFiliere.image_url && e.target.src !== getFiliereImage(selectedFiliere.slug)) {
+                                    e.target.onerror = null;
+                                    e.target.src = getFiliereImage(selectedFiliere.slug);
+                                  } else {
+                                    e.target.style.display = 'none';
+                                  }
                                 }}
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent"></div>
                             </div>
                             <div className="p-4">
-                              <h4 className="font-semibold text-lg text-primary mb-2">{speciality.name?.fr}</h4>
-                              <p className="text-gray-600 text-sm">{speciality.description?.fr?.substring(0, 100)}...</p>
+                              <h4 className="font-semibold text-lg text-primary mb-2">{getMultilingualValueFromI18n(speciality.name, i18n)}</h4>
+                              <p className="text-gray-600 text-sm">{getMultilingualValueFromI18n(speciality.description, i18n)?.substring(0, 100)}...</p>
                               {speciality.duration && (
                                 <p className="text-sm text-gray-500 mt-2">{t('filieres.duration')}: {speciality.duration}</p>
                               )}
@@ -181,23 +242,44 @@ const Filieres = () => {
                   onClick={() => handleFiliereClick(filiere.id)}
                   whileHover={{ scale: 1.03, y: -5 }}
                 >
+                    {/* Always show image - use uploaded image_url if available, otherwise fallback to static image */}
                   <div className="relative h-48 overflow-hidden">
                     <img 
-                      src={getFiliereImage(filiere.slug || filiere.id)} 
-                      alt={filiere.name?.fr}
+                      src={filiere.image_url ? getImageUrl(filiere.image_url, true) : getFiliereImage(filiere.slug)} 
+                      alt={getMultilingualValueFromI18n(filiere.name, i18n)}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      key={`${filiere.id}-${filiere.image_url || 'fallback'}-${filiere.slug}`}
                       onError={(e) => {
-                        console.error('Filière image failed to load:', filiere.slug || filiere.id);
-                        e.target.src = IMAGE_PATHS.FILIERES.NURSING; // Fallback
+                        console.error('❌ Filière image failed to load:', {
+                          filiere_id: filiere.id,
+                          filiere_name: getMultilingualValueFromI18n(filiere.name, i18n),
+                          image_url: filiere.image_url || 'NULL',
+                          fallback_used: !filiere.image_url,
+                          fallback_path: getFiliereImage(filiere.slug),
+                          attempted_url: e.target.src
+                        });
+                        // Try fallback if uploaded image fails
+                        if (filiere.image_url && e.target.src !== getFiliereImage(filiere.slug)) {
+                          e.target.onerror = null;
+                          e.target.src = getFiliereImage(filiere.slug);
+                        } else {
+                          // Show placeholder if both fail
+                          e.target.onerror = null;
+                          e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f0f0f0" width="400" height="300"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="14" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage non disponible%3C/text%3E%3C/svg%3E';
+                        }
+                      }}
+                      onLoad={() => {
+                        const imageSource = filiere.image_url ? 'uploaded' : 'fallback';
+                        console.log(`✅ Image loaded successfully (${imageSource}):`, filiere.image_url || getFiliereImage(filiere.slug));
                       }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent"></div>
                     <div className="absolute bottom-4 left-4 right-4">
-                      <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">{filiere.name?.fr}</h3>
+                      <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">{getMultilingualValueFromI18n(filiere.name, i18n)}</h3>
                     </div>
                   </div>
                   <div className="p-6">
-                    <p className="text-gray-600 mb-4 line-clamp-3">{filiere.description?.fr}</p>
+                    <p className="text-gray-600 mb-4 line-clamp-3">{getMultilingualValueFromI18n(filiere.description, i18n)}</p>
                     <motion.button
                       className="text-primary hover:text-primary-dark flex items-center font-medium"
                       whileHover={{ x: 5 }}

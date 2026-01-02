@@ -46,7 +46,9 @@ const RegulatoryTextsManagement = () => {
       
       // More detailed error message
       let detailedError = errorMsg;
-      if (error.response?.status === 404) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        detailedError = 'Non authentifié. Veuillez vous reconnecter.';
+      } else if (error.response?.status === 404) {
         detailedError = 'Endpoint non trouvé. Vérifiez que le backend est déployé.';
       } else if (error.response?.status === 500) {
         detailedError = 'Erreur serveur. Vérifiez les logs du backend.';

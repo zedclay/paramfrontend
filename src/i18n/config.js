@@ -22,7 +22,8 @@ i18n
       },
     },
     fallbackLng: 'fr',
-    lng: 'fr', // Set French as default language
+    // Don't set lng explicitly - let LanguageDetector handle it
+    // This allows localStorage to take precedence
     defaultNS: 'translation',
     interpolation: {
       escapeValue: false,
@@ -31,6 +32,8 @@ i18n
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
       lookupLocalStorage: 'i18nextLng',
+      // Set default language only if nothing is found
+      checkWhitelist: true,
     },
   });
 

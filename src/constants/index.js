@@ -101,7 +101,18 @@ export const getFiliereImage = (identifier) => {
   
   // If it's a slug (string)
   if (typeof identifier === 'string') {
-    return IMAGE_PATHS.FILIERES[identifier] || IMAGE_PATHS.FILIERES.NURSING;
+    // Try exact match first
+    if (IMAGE_PATHS.FILIERES[identifier]) {
+      return IMAGE_PATHS.FILIERES[identifier];
+    }
+    // Try partial match (slug contains the key)
+    const slugLower = identifier.toLowerCase();
+    for (const [key, path] of Object.entries(IMAGE_PATHS.FILIERES)) {
+      if (key !== 'NURSING' && key !== 'EQUIPMENT' && key !== 'TEAM' && slugLower.includes(key.toLowerCase())) {
+        return path;
+      }
+    }
+    return IMAGE_PATHS.FILIERES.NURSING;
   }
   
   // If it's an ID (number), map to slug

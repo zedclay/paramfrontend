@@ -78,21 +78,31 @@ console.log('========================');
 
 function App() {
   const { i18n } = useTranslation();
-  const [locale, setLocale] = useState(i18n.language || 'fr');
+  // Initialize locale from localStorage or i18n's current language
+  const [locale, setLocale] = useState(() => {
+    const savedLocale = localStorage.getItem('i18nextLng');
+    return savedLocale || i18n.language || 'fr';
+  });
 
   useEffect(() => {
-    // Sync i18n with locale state
-    const savedLocale = localStorage.getItem('i18nextLng') || 'fr';
-    setLocale(savedLocale);
-    i18n.changeLanguage(savedLocale);
-    document.documentElement.setAttribute('dir', savedLocale === 'ar' ? 'rtl' : 'ltr');
-    document.documentElement.setAttribute('lang', savedLocale);
-  }, [i18n]);
+    // Sync i18n with locale state on mount
+    const savedLocale = localStorage.getItem('i18nextLng') || i18n.language || 'fr';
+    if (savedLocale && savedLocale !== i18n.language) {
+      i18n.changeLanguage(savedLocale);
+    }
+    setLocale(i18n.language || savedLocale);
+    const currentLang = i18n.language || savedLocale;
+    document.documentElement.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', currentLang);
+  }, []); // Run only once on mount
 
   const changeLocale = (newLocale) => {
     setLocale(newLocale);
-    i18n.changeLanguage(newLocale);
+    // Save to localStorage first
     localStorage.setItem('i18nextLng', newLocale);
+    // Then change language in i18n
+    i18n.changeLanguage(newLocale);
+    // Update document attributes
     document.documentElement.setAttribute('dir', newLocale === 'ar' ? 'rtl' : 'ltr');
     document.documentElement.setAttribute('lang', newLocale);
   };
